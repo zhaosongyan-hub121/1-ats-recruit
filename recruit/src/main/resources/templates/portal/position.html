@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>职位详情 - ATS 招聘系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                         "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #f5f7fa;
+            color: #303133;
+            min-height: 100vh;
+        }
+        .brand-bar {
+            background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .brand-bar .brand {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .brand-bar .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 16px;
+        }
+        .brand-bar .nav-links a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .brand-bar .nav-links a:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+        .brand-bar .nav-links .divider {
+            color: rgba(255,255,255,0.3);
+        }
+        .brand-bar .spacer { flex: 1; }
+        .brand-bar .admin-link {
+            color: #ffd04b;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 14px;
+            border: 1px solid rgba(255,208,75,0.5);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .brand-bar .admin-link:hover {
+            background: rgba(255,208,75,0.15);
+            border-color: #ffd04b;
+        }
+        .notice-bar {
+            display: none;
+            padding: 14px 40px;
+            font-size: 14px;
+            text-align: center;
+            animation: slideDown 0.3s ease;
+        }
+        .notice-bar.show { display: block; }
+        .notice-bar.success {
+            background: #f0f9eb;
+            color: #67c23a;
+            border-bottom: 1px solid #e1f3d8;
+        }
+        .notice-bar.error {
+            background: #fef0f0;
+            color: #f56c6c;
+            border-bottom: 1px solid #fbc4c4;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .main-layout {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 24px;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #909399;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #409eff; }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .position-header {
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f2f6fc;
+            margin-bottom: 24px;
+        }
+        .position-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #303133;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .status-tag {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .tag-open { background: #f0f9eb; color: #67c23a; }
+        .dept-chip {
+            display: inline-block;
+            padding: 6px 14px;
+            background: #ecf5ff;
+            color: #409eff;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .section-block {
+            margin-bottom: 28px;
+        }
+        .section-block:last-child { margin-bottom: 0; }
+        .section-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #303133;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-label::before {
+            content: "";
+            width: 3px;
+            height: 14px;
+            background: linear-gradient(180deg, #409eff, #667eea);
+            border-radius: 2px;
+        }
+        .section-content {
+            color: #606266;
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            padding-left: 11px;
+        }
+        .form-card h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #303133;
+        }
+        .form-card .subtitle {
+            color: #909399;
+            font-size: 13px;
+            margin-bottom: 24px;
+        }
+        .field { margin-bottom: 18px; }
+        .field label {
+            display: block;
+            font-size: 13px;
+            color: #606266;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .field label .required { color: #f56c6c; margin-left: 2px; }
+        .field input,
+        .field textarea,
+        .field select {
+            width: 100%;
+            border: 1px solid #dcdfe6;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+            font-family: inherit;
+            color: #303133;
+            background: #fff;
+        }
+        .field input:focus,
+        .field textarea:focus,
+        .field select:focus {
+            border-color: #409eff;
+            box-shadow: 0 0 0 3px rgba(64,158,255,0.15);
+        }
+        .field input.error,
+        .field textarea.error {
+            border-color: #f56c6c;
+        }
+        .field textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+        .field textarea.tall { min-height: 120px; }
+        .field .hint {
+            color: #c0c4cc;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .field .error-msg {
+            color: #f56c6c;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+        .field .error-msg.show { display: block; }
+        .submit-btn {
+            width: 100%;
+            height: 48px;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(90deg, #67c23a, #85ce61);
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(103,194,58,0.4);
+        }
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: #909399;
+            font-size: 12px;
+            background: #fff;
+            border-top: 1px solid #ebeef5;
+            margin-top: 40px;
+        }
+        @media (max-width: 900px) {
+            .main-layout { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .brand-bar { padding: 14px 20px; flex-wrap: wrap; }
+            .main-layout { padding: 20px 16px; }
+            .card { padding: 20px; }
+            .position-title { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="brand-bar">
+        <div class="brand">🎯 ATS 招聘系统</div>
+        <div class="nav-links">
+            <span class="divider">|</span>
+            <a href="/portal">职位大厅</a>
+        </div>
+        <div class="spacer"></div>
+        <a href="/dashboard" class="admin-link">进入管理端 →</a>
+    </div>
+
+    <div id="noticeBar" class="notice-bar"></div>
+
+    <div class="main-layout">
+        <div>
+            <a href="/portal" class="back-link">← 返回职位大厅</a>
+            <div class="card">
+                <div class="position-header">
+                    <div class="position-title">
+                        <span th:text="${position.title}">职位标题</span>
+                        <span class="status-tag tag-open">🔥 招聘中</span>
+                    </div>
+                    <div style="margin-top: 8px;">
+                        <span class="dept-chip" th:text="'🏢 ' + ${position.department}">技术部</span>
+                    </div>
+                </div>
+
+                <div class="section-block">
+                    <div class="section-label">职位描述</div>
+                    <div class="section-content" th:text="${position.description != null ? position.description : '暂无描述'}">
+                        职位描述内容...
+                    </div>
+                </div>
+
+                <div class="section-block">
+                    <div class="section-label">任职要求</div>
+                    <div class="section-content" th:text="${position.requirements != null ? position.requirements : '暂无要求'}">
+                        任职要求内容...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div style="height: 52px;"></div>
+            <div class="card form-card">
+                <h2>📨 投递这个职位</h2>
+                <p class="subtitle">填写以下信息，我们的 HR 会尽快审核</p>
+
+                <form id="applyForm" autocomplete="off" th:object="${position}">
+                    <input type="hidden" id="positionId" th:value="*{id}">
+
+                    <div class="field">
+                        <label for="name">姓名<span class="required">*</span></label>
+                        <input id="name" type="text" placeholder="请输入您的姓名" required>
+                        <div class="error-msg" id="nameErr">请输入姓名</div>
+                    </div>
+
+                    <div class="field">
+                        <label for="email">邮箱<span class="required">*</span></label>
+                        <input id="email" type="email" placeholder="example@company.com" required>
+                        <div class="error-msg" id="emailErr">请输入有效的邮箱地址</div>
+                    </div>
+
+                    <div class="field">
+                        <label for="phone">电话</label>
+                        <input id="phone" type="tel" placeholder="138 xxxx xxxx">
+                    </div>
+
+                    <div class="field">
+                        <label for="skills">技能</label>
+                        <input id="skills" type="text" placeholder="Java, SpringBoot, MySQL">
+                        <div class="hint">多个技能用英文逗号分隔</div>
+                    </div>
+
+                    <div class="field">
+                        <label for="experienceYears">工作年限</label>
+                        <input id="experienceYears" type="number" min="0" max="50" placeholder="例如：3">
+                    </div>
+
+                    <div class="field">
+                        <label for="resumeText">简历文本</label>
+                        <textarea id="resumeText" class="tall" placeholder="请粘贴您的简历内容，或简要介绍个人经历、项目经验等..."></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label for="coverLetter">附言 / Cover Letter</label>
+                        <textarea id="coverLetter" placeholder="想对 HR 说的话，可留空..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        ✅ 提交投递申请
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        © 2026 ATS 招聘系统 · 求职者端门户 · Powered by Spring Boot + Thymeleaf
+    </footer>
+
+    <script src="/ats-common.js"></script>
+    <script>
+        (function () {
+            const form = document.getElementById('applyForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const noticeBar = document.getElementById('noticeBar');
+
+            function showNotice(msg, type) {
+                noticeBar.className = 'notice-bar show ' + (type || 'success');
+                noticeBar.textContent = msg;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            function hideNotice() {
+                noticeBar.className = 'notice-bar';
+            }
+
+            function showFieldErr(fieldId, show) {
+                const el = document.getElementById(fieldId);
+                const msgId = fieldId + 'Err';
+                const msgEl = document.getElementById(msgId);
+                if (el) {
+                    if (show) el.classList.add('error');
+                    else el.classList.remove('error');
+                }
+                if (msgEl) {
+                    if (show) msgEl.classList.add('show');
+                    else msgEl.classList.remove('show');
+                }
+            }
+
+            function validateEmail(val) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+            }
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                hideNotice();
+                showFieldErr('name', false);
+                showFieldErr('email', false);
+
+                const positionId = Number(document.getElementById('positionId').value);
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const skills = document.getElementById('skills').value.trim();
+                const experienceYearsRaw = document.getElementById('experienceYears').value.trim();
+                const resumeText = document.getElementById('resumeText').value.trim();
+                const coverLetter = document.getElementById('coverLetter').value.trim();
+
+                let hasErr = false;
+                if (!name) {
+                    showFieldErr('name', true);
+                    hasErr = true;
+                }
+                if (!email || !validateEmail(email)) {
+                    showFieldErr('email', true);
+                    hasErr = true;
+                }
+                if (hasErr) {
+                    showNotice('请检查表单中的必填项', 'error');
+                    return;
+                }
+
+                const payload = {
+                    positionId: positionId,
+                    name: name,
+                    email: email,
+                    phone: phone || null,
+                    skills: skills || null,
+                    experienceYears: experienceYearsRaw ? Number(experienceYearsRaw) : null,
+                    resumeText: resumeText || null,
+                    coverLetter: coverLetter || null
+                };
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = '提交中...';
+
+                try {
+                    const resp = await ATS.ajax('/api/portal/applications', {
+                        method: 'POST',
+                        body: payload
+                    });
+                    if (resp && resp.code === 0) {
+                        showNotice('✅ 投递成功，等待 HR 审核', 'success');
+                        form.reset();
+                        setTimeout(function () {
+                            window.location.href = '/portal';
+                        }, 2000);
+                    } else {
+                        const msg = (resp && resp.message) ? resp.message : '投递失败，请稍后重试';
+                        showNotice('❌ ' + msg, 'error');
+                    }
+                } catch (err) {
+                    showNotice('❌ 网络异常：' + ((err && err.message) || err), 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '✅ 提交投递申请';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

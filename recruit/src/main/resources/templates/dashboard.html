@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS 招聘管理系统 - 管理后台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #f5f7fa;
+            color: #303133;
+            min-height: 100vh;
+            display: flex;
+        }
+        /* ---------- 侧边栏 ---------- */
+        .sidebar {
+            width: 220px;
+            background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            padding: 24px 0;
+            flex-shrink: 0;
+            min-height: 100vh;
+        }
+        .sidebar .logo {
+            padding: 0 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 12px;
+        }
+        .sidebar .logo h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .sidebar .logo p {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+            font-size: 14px;
+            text-decoration: none;
+            color: #fff;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.1); }
+        .menu-item.active {
+            background: rgba(255,255,255,0.15);
+            border-left: 3px solid #67c23a;
+            padding-left: 17px;
+            font-weight: 500;
+        }
+        .menu-icon {
+            width: 18px; text-align: center; font-size: 16px;
+        }
+        /* ---------- 主区域 ---------- */
+        .main { flex: 1; display: flex; flex-direction: column; }
+        .header {
+            background: #fff;
+            height: 60px;
+            padding: 0 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 4px rgba(0,21,41,0.08);
+        }
+        .header .breadcrumb {
+            color: #606266;
+            font-size: 14px;
+        }
+        .header .breadcrumb strong { color: #303133; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .header-right .date { color: #909399; font-size: 13px; }
+        .user-chip {
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 14px;
+            background: #ecf5ff;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #409eff;
+        }
+        .logout-btn {
+            border: 1px solid #fbc4c4; background: #fef0f0;
+            color: #f56c6c; padding: 6px 14px; border-radius: 20px;
+            font-size: 13px; cursor: pointer; transition: all .2s;
+        }
+        .logout-btn:hover { background: #f56c6c; color: #fff; border-color: #f56c6c; }
+        .avatar {
+            width: 28px; height: 28px;
+            background: linear-gradient(135deg, #409eff, #667eea);
+            color: #fff;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 600;
+        }
+        /* ---------- 内容 ---------- */
+        .content { padding: 24px 32px; flex: 1; }
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #303133;
+        }
+        .page-title span {
+            font-size: 13px;
+            color: #909399;
+            font-weight: normal;
+            margin-left: 8px;
+        }
+        /* ---------- 统计卡片 ---------- */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+        .stat-card .stat-info .label {
+            color: #909399; font-size: 13px; margin-bottom: 8px;
+        }
+        .stat-card .stat-info .value {
+            font-size: 28px; font-weight: 700; color: #303133;
+        }
+        .stat-card .stat-info .sub {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #67c23a;
+        }
+        .stat-icon {
+            width: 56px; height: 56px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            color: #fff;
+        }
+        .icon-blue   { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .icon-green  { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .icon-orange { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .icon-purple { background: linear-gradient(135deg, #4facfe, #00f2fe); color:#1e3c72; }
+        /* ---------- 表格区域 ---------- */
+        .panels {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 20px;
+        }
+        .panel {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #ebeef5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #303133;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .panel-title::before {
+            content: "";
+            width: 3px; height: 14px;
+            background: #409eff;
+            border-radius: 2px;
+        }
+        .btn-link {
+            color: #409eff; font-size: 13px; cursor: pointer;
+            text-decoration: none;
+        }
+        .btn-link:hover { text-decoration: underline; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            background: #fafafa;
+            padding: 12px 24px;
+            text-align: left;
+            font-size: 13px;
+            color: #909399;
+            font-weight: 500;
+            border-bottom: 1px solid #ebeef5;
+        }
+        tbody td {
+            padding: 14px 24px;
+            font-size: 14px;
+            color: #606266;
+            border-bottom: 1px solid #f2f6fc;
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f5f7fa; }
+        .status-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        .tag-open { background: #f0f9eb; color: #67c23a; }
+        .tag-closed { background: #fef0f0; color: #f56c6c; }
+        .tag-pending { background: #fdf6ec; color: #e6a23c; }
+        .tag-reviewed { background: #ecf5ff; color: #409eff; }
+        .dept-chip {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #f4f4f5;
+            color: #909399;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .empty {
+            padding: 40px;
+            text-align: center;
+            color: #c0c4cc;
+            font-size: 13px;
+        }
+        /* ---------- 页脚 ---------- */
+        .footer {
+            text-align: center;
+            padding: 16px;
+            color: #909399;
+            font-size: 12px;
+            background: #fff;
+            border-top: 1px solid #ebeef5;
+        }
+        /* ---------- 响应式 ---------- */
+        @media (max-width: 1200px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .panels { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .stats { grid-template-columns: 1fr; }
+            .content { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h1>🎯 ATS 招聘系统</h1>
+            <p>Applicant Tracking System</p>
+        </div>
+        <a class="menu-item active" href="/dashboard">
+            <span class="menu-icon">📊</span>
+            <span>数据看板</span>
+        </a>
+        <a class="menu-item" href="/page/positions">
+            <span class="menu-icon">💼</span>
+            <span>职位管理</span>
+        </a>
+        <a class="menu-item" href="/page/candidates">
+            <span class="menu-icon">👥</span>
+            <span>候选人库</span>
+        </a>
+        <a class="menu-item" href="/page/applications">
+            <span class="menu-icon">📨</span>
+            <span>投递记录</span>
+        </a>
+        <a class="menu-item" href="/page/rules">
+            <span class="menu-icon">⚙️</span>
+            <span>筛选规则</span>
+        </a>
+        <a class="menu-item" th:classappend="${activeMenu == 'users'} ? 'active'" href="/page/users">
+            <span class="menu-icon">👤</span>
+            <span>用户管理</span>
+        </a>
+        <a class="menu-item" href="/swagger-ui.html" target="_blank">
+            <span class="menu-icon">🧪</span>
+            <span>API 文档</span>
+        </a>
+    </aside>
+
+    <!-- 主区域 -->
+    <div class="main">
+        <!-- 顶部 -->
+        <header class="header">
+            <div class="breadcrumb">
+                🏠 首页 / <strong>数据看板</strong>
+            </div>
+            <div class="header-right">
+                <span class="date">📅 <span th:text="${today}">2026-08-10</span></span>
+                <div class="user-chip" title="当前用户">
+                    <div class="avatar">管</div>
+                    <span th:text="${user}">系统管理员</span>
+                </div>
+                <button type="button" class="logout-btn" id="logoutBtn" title="退出登录">🚪 退出</button>
+            </div>
+        </header>
+
+        <!-- 内容 -->
+        <main class="content">
+            <div class="page-title">
+                欢迎回来！<span>这是您的招聘数据概览</span>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="label">招聘职位</div>
+                        <div class="value" th:text="${positionCount}">0</div>
+                        <div class="sub">↑ 全部来自数据库</div>
+                    </div>
+                    <div class="stat-icon icon-blue">💼</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="label">候选人总数</div>
+                        <div class="value" th:text="${candidateCount}">0</div>
+                        <div class="sub">↑ 持续增长中</div>
+                    </div>
+                    <div class="stat-icon icon-green">👥</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="label">投递总数</div>
+                        <div class="value" th:text="${applicationCount}">0</div>
+                        <div class="sub" style="color:#e6a23c">↑ 待处理</div>
+                    </div>
+                    <div class="stat-icon icon-orange">📨</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="label">筛选通过</div>
+                        <div class="value" th:text="${passedCount}">0</div>
+                        <div class="sub">✓ 引擎自动评分</div>
+                    </div>
+                    <div class="stat-icon icon-purple">✅</div>
+                </div>
+            </div>
+
+            <!-- 双栏面板 -->
+            <div class="panels">
+                <!-- 职位列表 -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">最新职位</div>
+                        <a class="btn-link" href="/swagger-ui.html" target="_blank">查看全部 →</a>
+                    </div>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>职位</th>
+                            <th>部门</th>
+                            <th>状态</th>
+                            <th>创建时间</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(positions)}">
+                            <td colspan="4" class="empty">暂无职位数据</td>
+                        </tr>
+                        <tr th:each="p : ${positions}">
+                            <td style="color:#303133; font-weight:500;" th:text="${p.title}">Java 工程师</td>
+                            <td><span class="dept-chip" th:text="${p.department}">技术部</span></td>
+                            <td>
+                                <span class="status-tag"
+                                      th:class="${p.status == 'OPEN'} ? 'tag-open' : 'tag-closed'"
+                                      th:text="${p.status == 'OPEN'} ? '🔥 招聘中' : '已关闭'">招聘中</span>
+                            </td>
+                            <td th:text="${p.createdAt != null} ? ${#strings.substring(p.createdAt.toString(), 5, 10) + ' ' + #strings.substring(p.createdAt.toString(), 11, 16)} : '-'">08-10 18:30</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 最近投递 -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">最近投递</div>
+                        <a class="btn-link" href="/swagger-ui.html" target="_blank">API文档 →</a>
+                    </div>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>候选人</th>
+                            <th>投递岗位</th>
+                            <th>状态</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(recentApps)}">
+                            <td colspan="3" class="empty">暂无投递记录</td>
+                        </tr>
+                        <tr th:each="app : ${recentApps}">
+                            <td style="color:#303133; font-weight:500;"
+                                th:text="${candidateNameMap[app.id]}">-</td>
+                            <td th:text="${positionTitleMap[app.id]}">-</td>
+                            <td>
+                                <span class="status-tag"
+                                      th:class="${appStatusClassMap[app.id]}"
+                                      th:text="${appStatusTextMap[app.id]}">待审核</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 图表面板 -->
+            <div class="panels" style="margin-top:24px;">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">🥧 各职位投递占比</div>
+                        <span class="tag-reviewed" style="padding:4px 10px;border-radius:12px;">饼图</span>
+                    </div>
+                    <div style="padding:12px; box-sizing:border-box;">
+                        <canvas id="positionPieChart" height="220"></canvas>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">📊 筛选通过情况</div>
+                        <span class="tag-open" style="padding:4px 10px;border-radius:12px;">柱图</span>
+                    </div>
+                    <div style="padding:12px; box-sizing:border-box;">
+                        <canvas id="passBarChart" height="220"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 最近筛选结果 -->
+            <div class="panel" style="margin-top:24px;">
+                <div class="panel-header">
+                    <div class="panel-title">🧪 最近筛选结果</div>
+                    <a class="btn-link" href="/page/applications">去投递记录筛选 →</a>
+                </div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>候选人</th>
+                        <th>投递岗位</th>
+                        <th>得分</th>
+                        <th>结果</th>
+                        <th>筛选时间</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(recentResults)}">
+                        <td colspan="5" class="empty">暂无筛选记录</td>
+                    </tr>
+                    <tr th:each="sr : ${recentResults}">
+                        <td style="color:#303133; font-weight:500;"
+                            th:text="${srCandidateNameMap[sr.id]}">-</td>
+                        <td th:text="${srPositionTitleMap[sr.id]}">-</td>
+                        <td>
+                            <span style="font-weight:600;color:#409eff;"
+                                  th:text="${sr.totalScore} + ' / ' + ${sr.maxScore}">0/100</span>
+                        </td>
+                        <td>
+                            <span class="status-tag"
+                                  th:class="${srPassClassMap[sr.id]}"
+                                  th:text="${srPassTextMap[sr.id]}">通过</span>
+                        </td>
+                        <td th:text="${sr.createdAt != null} ? ${#strings.substring(sr.createdAt.toString(), 5, 10) + ' ' + #strings.substring(sr.createdAt.toString(), 11, 16)} : '-'">08-10 18:30</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            © 2026 ATS 招聘管理系统 · Powered by Spring Boot 2.7.18 + MyBatis-Plus + Thymeleaf
+        </footer>
+    </div>
+    <script src="/ats-common.js"></script>
+    <script>
+        // 登出按钮
+        document.addEventListener('DOMContentLoaded', function () {
+            var btn = document.getElementById('logoutBtn');
+            if (btn) btn.addEventListener('click', function () { ATS.logout(); });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            try {
+                const posLabels = JSON.parse(/*[[${chartPositionLabels}]]*/ '[]');
+                const posData = JSON.parse(/*[[${chartPositionData}]]*/ '[]');
+                const passLabels = JSON.parse(/*[[${chartPassLabels}]]*/ '[]');
+                const passData = JSON.parse(/*[[${chartPassData}]]*/ '[]');
+                const palette = ['#409eff','#67c23a','#e6a23c','#f56c6c','#909399','#79bbff','#95d475','#f3d19e','#fab6b6','#c8c9cc'];
+
+                const pieEl = document.getElementById('positionPieChart');
+                if (pieEl) {
+                    new Chart(pieEl, {
+                        type: 'doughnut',
+                        data: {
+                            labels: posLabels.length ? posLabels : ['暂无数据'],
+                            datasets: [{
+                                data: posData.length ? posData : [1],
+                                backgroundColor: posData.length ? palette.slice(0, posLabels.length) : ['#dcdfe6'],
+                                borderColor: '#fff', borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { position: 'right', labels: { font: { size: 12 } } } }
+                        }
+                    });
+                }
+
+                const barEl = document.getElementById('passBarChart');
+                if (barEl) {
+                    new Chart(barEl, {
+                        type: 'bar',
+                        data: {
+                            labels: passLabels,
+                            datasets: [{
+                                label: '次数', data: passData,
+                                backgroundColor: ['#67c23a', '#f56c6c'],
+                                borderRadius: 8, barThickness: 56
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                        }
+                    });
+                }
+            } catch (e) { console.error('图表渲染失败', e); }
+        })();
+    </script>
+</body>
+</html>

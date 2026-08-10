@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>候选人库 - ATS 招聘系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f7fa; color: #303133; min-height: 100vh; display: flex; }
+        .sidebar { width: 220px; background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%); color: #fff; padding: 24px 0; flex-shrink: 0; min-height: 100vh; }
+        .sidebar .logo { padding: 0 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; }
+        .sidebar .logo h1 { font-size: 18px; font-weight: 600; }
+        .sidebar .logo p { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+        .menu-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; font-size: 14px; text-decoration: none; color: #fff; }
+        .menu-item:hover { background: rgba(255,255,255,0.1); }
+        .menu-item.active { background: rgba(255,255,255,0.15); border-left: 3px solid #67c23a; padding-left: 17px; font-weight: 500; }
+        .menu-icon { width: 18px; text-align: center; font-size: 16px; }
+        .main { flex: 1; display: flex; flex-direction: column; }
+        .header { background: #fff; height: 60px; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,21,41,0.08); }
+        .header .breadcrumb { color: #606266; font-size: 14px; }
+        .header .breadcrumb strong { color: #303133; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .header-right .date { color: #909399; font-size: 13px; }
+        .user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: #ecf5ff; border-radius: 20px; font-size: 13px; color: #409eff; }
+        .logout-btn{border:1px solid #fbc4c4;background:#fef0f0;color:#f56c6c;padding:6px 14px;border-radius:20px;font-size:13px;cursor:pointer;transition:all .2s}.logout-btn:hover{background:#f56c6c;color:#fff;border-color:#f56c6c}
+        .avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #67c23a, #11998e); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        .content { padding: 24px 32px; flex: 1; }
+        .page-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+        .page-title span { font-size: 13px; color: #909399; font-weight: normal; margin-left: 8px; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; }
+        .search-box { display: flex; gap: 8px; flex: 1; }
+        .search-input { padding: 8px 14px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 14px; width: 300px; outline: none; }
+        .search-input:focus { border-color: #409eff; }
+        .btn { padding: 8px 20px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: #409eff; color: #fff; }
+        .btn-success { background: #67c23a; color: #fff; }
+        .btn-danger { background: #f56c6c; color: #fff; }
+        .btn-sm { padding: 4px 12px; font-size: 12px; }
+        .table-wrap { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { background: #fafafa; padding: 14px 24px; text-align: left; font-size: 13px; color: #909399; font-weight: 500; border-bottom: 1px solid #ebeef5; }
+        tbody td { padding: 14px 24px; font-size: 14px; color: #606266; border-bottom: 1px solid #f2f6fc; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f5f7fa; }
+        .skill-chip { display: inline-block; padding: 2px 8px; background: #ecf5ff; color: #409eff; border-radius: 4px; font-size: 12px; margin: 1px; }
+        .empty { padding: 40px; text-align: center; color: #c0c4cc; font-size: 13px; }
+        .footer { text-align: center; padding: 16px; color: #909399; font-size: 12px; background: #fff; border-top: 1px solid #ebeef5; }
+        .actions { display: flex; gap: 8px; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #fff; border-radius: 8px; padding: 32px; width: 480px; max-width: 90%; }
+        .modal h2 { font-size: 18px; margin-bottom: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; color: #606266; margin-bottom: 6px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 14px; outline: none; }
+        .form-group input:focus, .form-group textarea:focus { border-color: #409eff; }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo"><h1>🎯 ATS 招聘系统</h1><p>Applicant Tracking System</p></div>
+        <a class="menu-item" href="/dashboard"><span class="menu-icon">📊</span><span>数据看板</span></a>
+        <a class="menu-item" href="/page/positions"><span class="menu-icon">💼</span><span>职位管理</span></a>
+        <a class="menu-item active" href="/page/candidates"><span class="menu-icon">👥</span><span>候选人库</span></a>
+        <a class="menu-item" href="/page/applications"><span class="menu-icon">📨</span><span>投递记录</span></a>
+        <a class="menu-item" href="/page/rules"><span class="menu-icon">⚙️</span><span>筛选规则</span></a>
+        <a class="menu-item" th:classappend="${activeMenu == 'users'} ? 'active'" href="/page/users"><span class="menu-icon">👤</span><span>用户管理</span></a>
+        <a class="menu-item" href="/swagger-ui.html" target="_blank"><span class="menu-icon">🧪</span><span>API 文档</span></a>
+    </aside>
+
+    <div class="main">
+        <header class="header">
+            <div class="breadcrumb">🏠 首页 / <strong>候选人库</strong></div>
+            <div class="header-right">
+                <span class="date">📅 <span th:text="${today}">2026-08-10</span></span>
+                <div class="user-chip"><div class="avatar">管</div><span th:text="${user}">系统管理员</span></div>
+                <button type="button" class="logout-btn" id="logoutBtn" title="退出登录">🚪 退出</button>
+            </div>
+        </header>
+
+        <main class="content">
+            <div class="page-title">候选人库 <span>管理候选人简历与技能信息</span></div>
+
+            <div class="toolbar">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="keyword" placeholder="搜索姓名、技能或简历内容..." onkeyup="if(event.key==='Enter') doSearch()">
+                    <button class="btn btn-primary" onclick="doSearch()">🔍 搜索</button>
+                </div>
+                <button class="btn btn-success" onclick="openCreateModal()">➕ 新增候选人</button>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>ID</th><th>姓名</th><th>联系方式</th><th>技能</th><th>经验</th><th>操作</th></tr></thead>
+                    <tbody id="dataBody"><tr><td colspan="6" class="empty">加载中...</td></tr></tbody>
+                </table>
+            </div>
+        </main>
+
+        <footer class="footer">© 2026 ATS 招聘管理系统 · Powered by Spring Boot 2.7.18 + MyBatis-Plus</footer>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2 id="modalTitle">新增候选人</h2>
+            <input type="hidden" id="editId">
+            <div class="form-group"><label>姓名 *</label><input type="text" id="f_name" placeholder="如：张三"></div>
+            <div class="form-group"><label>邮箱</label><input type="email" id="f_email" placeholder="zhangsan@example.com"></div>
+            <div class="form-group"><label>电话</label><input type="text" id="f_phone" placeholder="13800000000"></div>
+            <div class="form-group"><label>技能（逗号分隔）</label><input type="text" id="f_skills" placeholder="Java,SpringBoot,MySQL"></div>
+            <div class="form-group"><label>工作年限</label><input type="number" id="f_experience" placeholder="5" min="0"></div>
+            <div class="form-group"><label>简历文本</label><textarea id="f_resume" placeholder="粘贴简历纯文本..."></textarea></div>
+            <div class="modal-actions">
+                <button class="btn" style="background:#f4f4f5;color:#606266;" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveCandidate()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/ats-common.js"></script>
+    <script>
+        const API = '/api/candidates';
+
+        async function loadData(keyword) {
+            const url = API + '?current=1&size=50' + (keyword ? '&keyword=' + encodeURIComponent(keyword) : '');
+            try {
+                const json = await ATS.ajax(url);
+                renderTable(json.data.records);
+            } catch(e) { document.getElementById('dataBody').innerHTML = '<tr><td colspan="6" class="empty">加载失败</td></tr>'; }
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById('dataBody');
+            if (!list || list.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty">暂无数据</td></tr>'; return; }
+            tbody.innerHTML = list.map(c => {
+                const skills = (c.skills || '').split(',').filter(s => s).map(s => '<span class="skill-chip">'+escapeHtml(s.trim())+'</span>').join('');
+                return `<tr>
+                    <td>${c.id}</td>
+                    <td style="font-weight:500;"><a href="/page/candidates/${c.id}" style="color:#409eff;text-decoration:none;">${escapeHtml(c.name)}</a></td>
+                    <td>${escapeHtml(c.email||'-')}<br><span style="color:#c0c4cc;font-size:12px;">${escapeHtml(c.phone||'')}</span></td>
+                    <td>${skills || '-'}</td>
+                    <td>${c.experienceYears != null ? c.experienceYears + '年' : '-'}</td>
+                    <td><div class="actions">
+                        <button class="btn btn-primary btn-sm" onclick="openEditModal(${c.id})">编辑</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteCandidate(${c.id})">删除</button>
+                    </div></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function doSearch() { loadData(document.getElementById('keyword').value); }
+
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = '新增候选人';
+            document.getElementById('editId').value = '';
+            ['f_name','f_email','f_phone','f_skills','f_experience','f_resume'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('modalOverlay').classList.add('show');
+        }
+
+        async function openEditModal(id) {
+            try {
+                const json = await ATS.ajax(API + '/' + id);
+                const c = json.data;
+                document.getElementById('modalTitle').textContent = '编辑候选人';
+                document.getElementById('editId').value = c.id;
+                document.getElementById('f_name').value = c.name || '';
+                document.getElementById('f_email').value = c.email || '';
+                document.getElementById('f_phone').value = c.phone || '';
+                document.getElementById('f_skills').value = c.skills || '';
+                document.getElementById('f_experience').value = c.experienceYears || '';
+                document.getElementById('f_resume').value = c.resumeText || '';
+                document.getElementById('modalOverlay').classList.add('show');
+            } catch(e) { alert('获取详情失败'); }
+        }
+
+        function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+        async function saveCandidate() {
+            const id = document.getElementById('editId').value;
+            const body = {
+                name: document.getElementById('f_name').value,
+                email: document.getElementById('f_email').value,
+                phone: document.getElementById('f_phone').value,
+                skills: document.getElementById('f_skills').value,
+                experienceYears: document.getElementById('f_experience').value ? parseInt(document.getElementById('f_experience').value) : null,
+                resumeText: document.getElementById('f_resume').value
+            };
+            if (!body.name) { alert('请填写姓名'); return; }
+            try {
+                const url = id ? API + '/' + id : API;
+                const method = id ? 'PUT' : 'POST';
+                const json = await ATS.ajax(url, { method, body: body });
+                if (json.code === 0) { closeModal(); loadData(document.getElementById('keyword').value); }
+                else { alert('保存失败'); }
+            } catch(e) { alert('保存失败: ' + e.message); }
+        }
+
+        async function deleteCandidate(id) {
+            if (!confirm('确认删除该候选人？')) return;
+            try {
+                const json = await ATS.ajax(API + '/' + id, { method: 'DELETE' });
+                if (json.code === 0) loadData(document.getElementById('keyword').value);
+                else alert('删除失败');
+            } catch(e) { alert('删除失败: ' + e.message); }
+        }
+
+        function escapeHtml(s) { if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        loadData();
+    </script>
+    <script>document.addEventListener('DOMContentLoaded', function(){var b=document.getElementById('logoutBtn');if(b)b.addEventListener('click',function(){ATS.logout();});});</script>
+</body>
+</html>

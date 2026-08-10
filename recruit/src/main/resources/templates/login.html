@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>ATS 招聘系统 - 登录</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                         "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #303133;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(31, 45, 61, 0.2);
+            padding: 40px 36px;
+            animation: cardIn .45s ease;
+        }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(16px);} to { opacity:1; transform:none;} }
+        .logo { text-align: center; margin-bottom: 28px; }
+        .logo h1 { font-size: 28px; color: #303133; }
+        .logo p { color: #909399; margin-top: 6px; font-size: 14px; }
+        .logo .badge {
+            display: inline-block; width: 60px; height: 60px; line-height: 60px;
+            font-size: 30px; background: linear-gradient(135deg, #409eff, #667eea);
+            color: #fff; border-radius: 16px; margin-bottom: 10px; box-shadow: 0 8px 20px rgba(64,158,255,.35);
+        }
+        .field { margin-bottom: 20px; }
+        .field label {
+            display: block; font-size: 14px; color: #606266; margin-bottom: 8px; font-weight: 500;
+        }
+        .field input {
+            width: 100%; height: 44px; border: 1px solid #dcdfe6; border-radius: 8px;
+            padding: 0 14px; font-size: 14px; outline: none; transition: all .2s;
+        }
+        .field input:focus { border-color: #409eff; box-shadow: 0 0 0 3px rgba(64,158,255,.15); }
+        .submit-btn {
+            width: 100%; height: 46px; border: none; border-radius: 8px; color: #fff;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            background: linear-gradient(90deg, #409eff, #667eea);
+            transition: all .2s;
+        }
+        .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(64,158,255,.35); }
+        .submit-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+        .tip {
+            margin-top: 20px; padding: 12px 14px; background: #ecf5ff; color: #409eff;
+            font-size: 13px; border-radius: 8px; line-height: 1.6;
+        }
+        .error {
+            margin-bottom: 16px; padding: 10px 14px; background: #fef0f0; color: #f56c6c;
+            border-radius: 8px; font-size: 13px; display: none;
+        }
+        .error.show { display: block; }
+        .footer { text-align: center; margin-top: 24px; color: #c0c4cc; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">
+            <div class="badge">🎯</div>
+            <h1>ATS 招聘系统</h1>
+            <p>Applicant Tracking System · 企业管理后台</p>
+        </div>
+
+        <div id="errorBox" class="error">用户名或密码错误</div>
+
+        <form id="loginForm" autocomplete="off">
+            <div class="field">
+                <label for="username">用户名</label>
+                <input id="username" type="text" placeholder="请输入用户名（演示：admin）" value="admin" required>
+            </div>
+            <div class="field">
+                <label for="password">密码</label>
+                <input id="password" type="password" placeholder="请输入密码（演示：admin123）" value="admin123" required>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn">登 录</button>
+        </form>
+
+        <div class="tip">
+            💡 <strong>演示账号</strong><br>
+            用户名：<code>admin</code>　密码：<code>admin123</code><br>
+            登录成功后会获取 JWT Token，后续请求自动携带。
+        </div>
+
+        <div class="footer">© 2026 ATS · Spring Boot 2.7.18 + JWT + Thymeleaf</div>
+    </div>
+
+    <script>
+        const TOKEN_KEY = 'ATS_TOKEN';
+        const USER_KEY  = 'ATS_USER';
+
+        // 已登录直接进看板
+        (function () {
+            if (localStorage.getItem(TOKEN_KEY)) { window.location.replace('/dashboard'); }
+        })();
+
+        const form = document.getElementById('loginForm');
+        const errorBox = document.getElementById('errorBox');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorBox.classList.remove('show');
+            submitBtn.disabled = true;
+            submitBtn.innerText = '登录中...';
+            try {
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+                const resp = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const json = await resp.json();
+                if (json.code === 0 && json.data && json.data.token) {
+                    localStorage.setItem(TOKEN_KEY, json.data.token);
+                    localStorage.setItem(USER_KEY, JSON.stringify(json.data));
+                    window.location.replace('/dashboard');
+                } else {
+                    errorBox.innerText = json.message || json.msg || '登录失败，请检查账号密码';
+                    errorBox.classList.add('show');
+                }
+            } catch (err) {
+                errorBox.innerText = '请求失败：' + (err.message || err);
+                errorBox.classList.add('show');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = '登 录';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS 招聘系统 - 职位大厅</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                         "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #f5f7fa;
+            color: #303133;
+            min-height: 100vh;
+        }
+        .brand-bar {
+            background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .brand-bar .brand {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .brand-bar .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 16px;
+        }
+        .brand-bar .nav-links a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .brand-bar .nav-links a:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+        .brand-bar .nav-links .divider {
+            color: rgba(255,255,255,0.3);
+        }
+        .brand-bar .spacer { flex: 1; }
+        .brand-bar .admin-link {
+            color: #ffd04b;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 14px;
+            border: 1px solid rgba(255,208,75,0.5);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .brand-bar .admin-link:hover {
+            background: rgba(255,208,75,0.15);
+            border-color: #ffd04b;
+        }
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .hero p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #303133;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title::before {
+            content: "";
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(180deg, #409eff, #667eea);
+            border-radius: 2px;
+        }
+        .job-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+        .job-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .job-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        .job-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .job-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #303133;
+            line-height: 1.4;
+        }
+        .status-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+        .tag-open {
+            background: #f0f9eb;
+            color: #67c23a;
+        }
+        .dept-chip {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #ecf5ff;
+            color: #409eff;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+        .job-req {
+            color: #606266;
+            font-size: 13px;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .job-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid #f2f6fc;
+        }
+        .post-date {
+            color: #909399;
+            font-size: 12px;
+        }
+        .apply-btn {
+            background: linear-gradient(90deg, #67c23a, #85ce61);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        .apply-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(103,194,58,0.4);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #909399;
+        }
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        .empty-state p {
+            font-size: 15px;
+        }
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: #909399;
+            font-size: 12px;
+            background: #fff;
+            border-top: 1px solid #ebeef5;
+            margin-top: 40px;
+        }
+        @media (max-width: 768px) {
+            .brand-bar { padding: 14px 20px; flex-wrap: wrap; }
+            .hero { padding: 40px 20px; }
+            .hero h1 { font-size: 26px; }
+            .main-content { padding: 24px 16px; }
+            .job-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="brand-bar">
+        <div class="brand">🎯 ATS 招聘系统</div>
+        <div class="nav-links">
+            <span class="divider">|</span>
+            <a href="/portal">职位大厅</a>
+        </div>
+        <div class="spacer"></div>
+        <a href="/dashboard" class="admin-link">进入管理端 →</a>
+    </div>
+
+    <section class="hero">
+        <h1>欢迎投递我们的职位！</h1>
+        <p>找到心仪的工作，开启你的职业新篇章</p>
+    </section>
+
+    <div class="main-content">
+        <div class="section-title">🔥 正在招聘的职位</div>
+
+        <div th:if="${#lists.isEmpty(positions)}" class="empty-state">
+            <div class="icon">📭</div>
+            <p>暂无招聘中的职位，敬请期待后续更新！</p>
+        </div>
+
+        <div class="job-grid" th:unless="${#lists.isEmpty(positions)}">
+            <div class="job-card" th:each="p : ${positions}">
+                <div class="job-card-header">
+                    <div class="job-title" th:text="${p.title}">Java 工程师</div>
+                    <span class="status-tag tag-open">🔥 招聘中</span>
+                </div>
+                <span class="dept-chip" th:text="${p.department}">技术部</span>
+                <div class="job-req" th:text="${#strings.abbreviate(p.requirements != null ? p.requirements : '暂无要求', 100)}">
+                    职位要求概要...
+                </div>
+                <div class="job-footer">
+                    <span class="post-date"
+                          th:text="${p.createdAt != null} ? ${'发布于 ' + #strings.substring(p.createdAt.toString(), 5, 10)} : ''">
+                        发布于 08-10
+                    </span>
+                    <a class="apply-btn" th:href="@{/portal/position/{id}(id=${p.id})}">
+                        查看详情并投递
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        © 2026 ATS 招聘系统 · 求职者端门户 · Powered by Spring Boot + Thymeleaf
+    </footer>
+
+    <script src="/ats-common.js"></script>
+</body>
+</html>

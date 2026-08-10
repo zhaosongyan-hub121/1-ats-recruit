@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投递记录 - ATS 招聘系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f7fa; color: #303133; min-height: 100vh; display: flex; }
+        .sidebar { width: 220px; background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%); color: #fff; padding: 24px 0; flex-shrink: 0; min-height: 100vh; }
+        .sidebar .logo { padding: 0 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; }
+        .sidebar .logo h1 { font-size: 18px; font-weight: 600; }
+        .sidebar .logo p { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+        .menu-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; font-size: 14px; text-decoration: none; color: #fff; }
+        .menu-item:hover { background: rgba(255,255,255,0.1); }
+        .menu-item.active { background: rgba(255,255,255,0.15); border-left: 3px solid #67c23a; padding-left: 17px; font-weight: 500; }
+        .menu-icon { width: 18px; text-align: center; font-size: 16px; }
+        .main { flex: 1; display: flex; flex-direction: column; }
+        .header { background: #fff; height: 60px; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,21,41,0.08); }
+        .header .breadcrumb { color: #606266; font-size: 14px; }
+        .header .breadcrumb strong { color: #303133; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .header-right .date { color: #909399; font-size: 13px; }
+        .user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: #ecf5ff; border-radius: 20px; font-size: 13px; color: #409eff; }
+        .logout-btn{border:1px solid #fbc4c4;background:#fef0f0;color:#f56c6c;padding:6px 14px;border-radius:20px;font-size:13px;cursor:pointer;transition:all .2s}.logout-btn:hover{background:#f56c6c;color:#fff;border-color:#f56c6c}
+        .avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #e6a23c, #f5576c); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        .content { padding: 24px 32px; flex: 1; }
+        .page-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+        .page-title span { font-size: 13px; color: #909399; font-weight: normal; margin-left: 8px; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+        .filter-box { display: flex; gap: 8px; align-items: center; }
+        .filter-select { padding: 8px 14px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 14px; outline: none; }
+        .btn { padding: 8px 20px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: #409eff; color: #fff; }
+        .btn-success { background: #67c23a; color: #fff; }
+        .btn-warning { background: #e6a23c; color: #fff; }
+        .btn-danger { background: #f56c6c; color: #fff; }
+        .btn-info { background: #909399; color: #fff; }
+        .btn-sm { padding: 4px 12px; font-size: 12px; }
+        .table-wrap { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { background: #fafafa; padding: 14px 24px; text-align: left; font-size: 13px; color: #909399; font-weight: 500; border-bottom: 1px solid #ebeef5; }
+        tbody td { padding: 14px 24px; font-size: 14px; color: #606266; border-bottom: 1px solid #f2f6fc; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f5f7fa; }
+        .status-tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; }
+        .tag-pending { background: #fdf6ec; color: #e6a23c; }
+        .tag-reviewed { background: #ecf5ff; color: #409eff; }
+        .tag-accepted { background: #f0f9eb; color: #67c23a; }
+        .tag-rejected { background: #fef0f0; color: #f56c6c; }
+        .empty { padding: 40px; text-align: center; color: #c0c4cc; font-size: 13px; }
+        .footer { text-align: center; padding: 16px; color: #909399; font-size: 12px; background: #fff; border-top: 1px solid #ebeef5; }
+        .actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+        .score-badge { font-size: 12px; padding: 2px 8px; border-radius: 10px; background:#ecf5ff; color:#409eff; font-weight: 600; }
+        .score-badge.pass { background:#f0f9eb; color:#67c23a; }
+        .score-badge.fail { background:#fef0f0; color:#f56c6c; }
+        .status-select { padding: 4px 8px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 12px; outline: none; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #fff; border-radius: 8px; padding: 32px; width: 420px; max-width: 90%; max-height: 85vh; overflow-y: auto; }
+        .modal h2 { font-size: 18px; margin-bottom: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; color: #606266; margin-bottom: 6px; }
+        .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 14px; }
+        .form-group textarea { resize: vertical; font-family: inherit; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+        .screen-result { background: #f9fbe7; border: 1px solid #c5e1a5; border-radius: 6px; padding: 16px; margin-top: 16px; }
+        .screen-result h3 { font-size: 14px; margin-bottom: 8px; color: #558b2f; }
+        .score-bar { height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin: 8px 0; display:block; }
+        .score-fill { height: 100%; background: linear-gradient(90deg, #67c23a, #4caf50); border-radius: 10px; transition: width 0.5s; display:block; }
+        .rule-item { padding: 10px 12px; margin: 6px 0; border-radius: 6px; background: #fafafa; font-size: 13px; border-left: 3px solid #dcdfe6; }
+        .rule-item.pass { border-left-color: #67c23a; background: #f0f9eb; }
+        .rule-item.fail { border-left-color: #f56c6c; background: #fef0f0; }
+        .rule-item .rule-name { font-weight: 600; color: #303133; }
+        .rule-item .rule-meta { font-size: 12px; color: #909399; margin-top: 4px; }
+        .toast { position: fixed; top: 24px; right: 24px; padding: 12px 20px; border-radius: 6px; font-size: 14px; z-index: 2000; box-shadow: 0 4px 16px rgba(0,0,0,0.1); transition: opacity .3s; }
+        .toast.ok { background: #f0f9eb; color: #67c23a; border: 1px solid #67c23a33; }
+        .toast.err { background: #fef0f0; color: #f56c6c; border: 1px solid #f56c6c33; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo"><h1>🎯 ATS 招聘系统</h1><p>Applicant Tracking System</p></div>
+        <a class="menu-item" href="/dashboard"><span class="menu-icon">📊</span><span>数据看板</span></a>
+        <a class="menu-item" href="/page/positions"><span class="menu-icon">💼</span><span>职位管理</span></a>
+        <a class="menu-item" href="/page/candidates"><span class="menu-icon">👥</span><span>候选人库</span></a>
+        <a class="menu-item active" href="/page/applications"><span class="menu-icon">📨</span><span>投递记录</span></a>
+        <a class="menu-item" href="/page/rules"><span class="menu-icon">⚙️</span><span>筛选规则</span></a>
+        <a class="menu-item" th:classappend="${activeMenu == 'users'} ? 'active'" href="/page/users"><span class="menu-icon">👤</span><span>用户管理</span></a>
+        <a class="menu-item" href="/swagger-ui.html" target="_blank"><span class="menu-icon">🧪</span><span>API 文档</span></a>
+    </aside>
+
+    <div class="main">
+        <header class="header">
+            <div class="breadcrumb">🏠 首页 / <strong>投递记录</strong></div>
+            <div class="header-right">
+                <span class="date">📅 <span th:text="${today}">2026-08-10</span></span>
+                <div class="user-chip"><div class="avatar">管</div><span th:text="${user}">系统管理员</span></div>
+                <button type="button" class="logout-btn" id="logoutBtn" title="退出登录">🚪 退出</button>
+            </div>
+        </header>
+
+        <main class="content">
+            <div class="page-title">投递记录 <span>查看候选人投递、智能筛选结果与状态流转</span></div>
+
+            <div class="toolbar">
+                <div class="filter-box">
+                    <select class="filter-select" id="statusFilter" onchange="loadData()">
+                        <option value="">全部状态</option>
+                        <option value="PENDING">⏳ 待审核</option>
+                        <option value="REVIEWED">👁️ 已查看</option>
+                        <option value="ACCEPTED">✅ 通过</option>
+                        <option value="REJECTED">❌ 拒绝</option>
+                    </select>
+                </div>
+                <button class="btn btn-success" onclick="openApplyModal()">➕ 新增投递</button>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>ID</th><th>候选人</th><th>投递职位</th><th>状态</th><th>得分</th><th>投递时间</th><th>操作</th></tr></thead>
+                    <tbody id="dataBody"><tr><td colspan="7" class="empty">加载中...</td></tr></tbody>
+                </table>
+            </div>
+        </main>
+
+        <footer class="footer">© 2026 ATS 招聘管理系统 · Powered by Spring Boot 2.7.18 + MyBatis-Plus</footer>
+    </div>
+
+    <!-- 新增投递弹窗 -->
+    <div class="modal-overlay" id="applyModal">
+        <div class="modal">
+            <h2>新增投递</h2>
+            <div class="form-group"><label>候选人 *</label><select id="f_candidateId"><option value="">请选择候选人</option></select></div>
+            <div class="form-group"><label>投递职位 *</label><select id="f_positionId"><option value="">请选择职位</option></select></div>
+            <div class="form-group"><label>求职信</label><textarea id="f_coverLetter" rows="3" placeholder="候选人求职信（可选）..."></textarea></div>
+            <div class="modal-actions">
+                <button class="btn" style="background:#f4f4f5;color:#606266;" onclick="closeModal('applyModal')">取消</button>
+                <button class="btn btn-primary" onclick="submitApply()">提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 筛选结果弹窗 -->
+    <div class="modal-overlay" id="screenModal">
+        <div class="modal" style="width:600px;">
+            <h2>🧪 智能筛选结果</h2>
+            <div id="screenResultContent"><p style="text-align:center;color:#909399;">🧪 正在执行智能筛选...</p></div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="closeModal('screenModal')">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/ats-common.js"></script>
+    <script>
+        const API = '/api/applications';
+        let candidates = [], positions = [], screenMap = {}; /* appId -> latestScreenResult */
+        const STATUS_OPTIONS = [
+            ['PENDING', '⏳ 待审核'],
+            ['REVIEWED', '👁️ 已查看'],
+            ['ACCEPTED', '✅ 通过'],
+            ['REJECTED', '❌ 拒绝']
+        ];
+
+        function toast(msg, type) {
+            const t = document.createElement('div');
+            t.className = 'toast ' + (type === 'ok' ? 'ok' : 'err');
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(function(){ t.style.opacity = '0'; setTimeout(function(){ t.remove(); }, 300); }, 2000);
+        }
+
+        async function loadData() {
+            const status = document.getElementById('statusFilter').value;
+            const url = API + '?current=1&size=50' + (status ? '&status=' + status : '');
+            try {
+                const [appJson, candJson, posJson, sresJson] = await Promise.all([
+                    ATS.ajax(url),
+                    ATS.ajax('/api/candidates?current=1&size=100'),
+                    ATS.ajax('/api/positions?current=1&size=100'),
+                    ATS.ajax('/api/screen-results?current=1&size=200')
+                ]);
+                if (appJson.code !== 0 || candJson.code !== 0 || posJson.code !== 0) {
+                    throw new Error('API 返回异常');
+                }
+                candidates = candJson.data.records || [];
+                positions = posJson.data.records || [];
+                /* 取每个 appId 最新的一条筛选结果（按 id 倒序更接近最新） */
+                screenMap = {};
+                (sresJson && sresJson.code === 0 && sresJson.data && sresJson.data.records || []).forEach(function (sr) {
+                    if (!screenMap[sr.applicationId] || sr.id > screenMap[sr.applicationId].id) {
+                        screenMap[sr.applicationId] = sr;
+                    }
+                });
+                renderTable(appJson.data.records || []);
+            } catch(e) {
+                console.error(e);
+                document.getElementById('dataBody').innerHTML = '<tr><td colspan="7" class="empty">加载失败：' + escapeHtml(e.message || '请稍后重试') + '</td></tr>';
+            }
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById('dataBody');
+            if (!list || list.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="empty">暂无数据</td></tr>'; return; }
+            tbody.innerHTML = list.map(function (a) {
+                const c = candidates.find(function (x){ return x.id === a.candidateId; });
+                const p = positions.find(function (x){ return x.id === a.positionId; });
+                const statusMap = {PENDING:['tag-pending','⏳ 待审核'],REVIEWED:['tag-reviewed','👁️ 已查看'],ACCEPTED:['tag-accepted','✅ 通过'],REJECTED:['tag-rejected','❌ 拒绝']};
+                const sc = statusMap[a.status] || ['tag-pending', a.status];
+                const sr = screenMap[a.id];
+                let scoreHtml = '<span style="color:#c0c4cc;font-size:12px;">未筛选</span>';
+                if (sr) {
+                    const cls = sr.pass === 1 ? 'pass' : (sr.pass === 0 ? 'fail' : '');
+                    scoreHtml = '<span class="score-badge ' + cls + '">' + sr.totalScore + ' / ' + sr.maxScore + ' · ' + (sr.pass === 1 ? '✅' : '❌') + '</span>';
+                }
+                const selOpts = STATUS_OPTIONS.map(function (kv) {
+                    return '<option value="' + kv[0] + '"' + (kv[0] === a.status ? ' selected' : '') + '>' + kv[1] + '</option>';
+                }).join('');
+                return '<tr>' +
+                    '<td>' + a.id + '</td>' +
+                    '<td style="color:#303133;font-weight:500;">' + (c ? escapeHtml(c.name) : '#' + a.candidateId) + '</td>' +
+                    '<td>' + (p ? escapeHtml(p.title) : '#' + a.positionId) + '</td>' +
+                    '<td><span class="status-tag ' + sc[0] + '">' + sc[1] + '</span></td>' +
+                    '<td>' + scoreHtml + '</td>' +
+                    '<td>' + formatTime(a.createdAt) + '</td>' +
+                    '<td><div class="actions">' +
+                        '<select class="status-select" onchange="changeStatus(' + a.id + ', this.value)">' + selOpts + '</select>' +
+                        (sr ? '<button class="btn btn-info btn-sm" onclick="viewScreenResult(' + a.id + ')">🔬 结果</button>' : '') +
+                        '<button class="btn btn-warning btn-sm" onclick="runScreen(' + a.id + ')">🧪 筛选</button>' +
+                        '<button class="btn btn-danger btn-sm" onclick="deleteApp(' + a.id + ')">删除</button>' +
+                    '</div></td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        async function openApplyModal() {
+            const candSel = document.getElementById('f_candidateId');
+            const posSel = document.getElementById('f_positionId');
+            candSel.innerHTML = '<option value="">请选择候选人</option>' + candidates.map(function (c){
+                return '<option value="' + c.id + '">' + escapeHtml(c.name) + ' · ' + escapeHtml((c.skills || '无技能').slice(0, 18)) + '</option>';
+            }).join('');
+            posSel.innerHTML = '<option value="">请选择职位</option>' + positions.map(function (p){
+                return '<option value="' + p.id + '">' + escapeHtml(p.title) + ' · ' + escapeHtml(p.department || '未分配') + '</option>';
+            }).join('');
+            document.getElementById('f_coverLetter').value = '';
+            document.getElementById('applyModal').classList.add('show');
+        }
+
+        async function submitApply() {
+            const body = {
+                candidateId: parseInt(document.getElementById('f_candidateId').value, 10),
+                positionId: parseInt(document.getElementById('f_positionId').value, 10),
+                coverLetter: document.getElementById('f_coverLetter').value
+            };
+            if (!body.candidateId || !body.positionId) { alert('请选择候选人和职位'); return; }
+            try {
+                const json = await ATS.ajax(API, { method: 'POST', body: body });
+                if (json.code === 0) { closeModal('applyModal'); toast('投递创建成功', 'ok'); loadData(); }
+                else { alert('提交失败: ' + (json.message || '未知错误')); }
+            } catch(e) { alert('提交失败: ' + e.message); }
+        }
+
+        async function changeStatus(applicationId, nextStatus) {
+            try {
+                const json = await ATS.ajax(API + '/' + applicationId + '/status', { method: 'PUT', body: { status: nextStatus } });
+                if (json.code === 0) { toast('状态已更新为 ' + nextStatus, 'ok'); loadData(); }
+                else { toast('更新失败: ' + (json.message || '未知错误'), 'err'); loadData(); }
+            } catch(e) { toast('更新失败: ' + e.message, 'err'); }
+        }
+
+        async function runScreen(applicationId) {
+            document.getElementById('screenResultContent').innerHTML = '<p style="text-align:center;color:#909399;">🧪 正在执行智能筛选，请稍候...</p>';
+            document.getElementById('screenModal').classList.add('show');
+            try {
+                const json = await ATS.ajax('/api/screen', { method: 'POST', body: { applicationId: applicationId } });
+                if (json.code === 0) {
+                    const r = json.data;
+                    /* 根据筛选结果自动流转状态：通过→ACCEPTED，不通过→REVIEWED */
+                    const autoStatus = r.pass === 1 ? 'ACCEPTED' : 'REVIEWED';
+                    try {
+                        await ATS.ajax(API + '/' + applicationId + '/status', { method: 'PUT', body: { status: autoStatus } });
+                    } catch(_) {}
+                    renderScreenResult(r);
+                    setTimeout(function () { loadData(); }, 500);
+                } else {
+                    document.getElementById('screenResultContent').innerHTML = '<p style="color:#f56c6c;text-align:center;">筛选失败: ' + escapeHtml(json.message || json.msg || '未知错误') + '</p>';
+                }
+            } catch(e) {
+                document.getElementById('screenResultContent').innerHTML = '<p style="color:#f56c6c;text-align:center;">筛选失败: ' + escapeHtml(e.message) + '</p>';
+            }
+        }
+
+        async function viewScreenResult(applicationId) {
+            document.getElementById('screenResultContent').innerHTML = '<p style="text-align:center;color:#909399;">📤 正在加载筛选结果...</p>';
+            document.getElementById('screenModal').classList.add('show');
+            try {
+                const json = await ATS.ajax('/api/screen-results/application/' + applicationId + '/latest');
+                if (json.code === 0 && json.data) {
+                    renderScreenResult(json.data);
+                } else {
+                    document.getElementById('screenResultContent').innerHTML = '<p style="color:#e6a23c;text-align:center;">暂无筛选结果</p>';
+                }
+            } catch(e) {
+                document.getElementById('screenResultContent').innerHTML = '<p style="color:#f56c6c;text-align:center;">加载失败: ' + escapeHtml(e.message) + '</p>';
+            }
+        }
+
+        function renderScreenResult(r) {
+            const maxScore = Number(r.maxScore) || 0;
+            const totalScore = Number(r.totalScore) || 0;
+            const pct = maxScore > 0 ? Math.round(totalScore / maxScore * 100) : 0;
+            const passColor = r.pass === 1 ? '#67c23a' : '#f56c6c';
+            let detailsHtml = '';
+            try {
+                const details = JSON.parse(r.ruleDetails || '[]');
+                if (Array.isArray(details) && details.length > 0) {
+                    detailsHtml = details.map(function (d) {
+                        const matched = !!d.matched;
+                        return '<div class="rule-item ' + (matched ? 'pass' : 'fail') + '">' +
+                            '<div class="rule-name">' + (matched ? '✅' : '❌') + ' ' + escapeHtml(d.ruleName || '未命名规则') +
+                            ' <span style="float:right;color:#909399;font-weight:400;">权重 ' + (d.weight || 0) + ' 分 / 实际 ' + (d.score || 0) + ' 分</span></div>' +
+                            '<div class="rule-meta">' + escapeHtml(d.reason || '无说明') + '</div>' +
+                        '</div>';
+                    }).join('');
+                } else {
+                    detailsHtml = '<p class="empty">暂无规则明细</p>';
+                }
+            } catch(e) {
+                detailsHtml = '<p class="empty">规则明细格式异常</p>';
+            }
+            document.getElementById('screenResultContent').innerHTML =
+                '<div style="text-align:center;margin-bottom:16px;">' +
+                    '<div style="font-size:40px;font-weight:700;color:' + passColor + ';">' + totalScore +
+                    '<span style="font-size:18px;color:#909399;"> / ' + maxScore + '</span></div>' +
+                    '<div style="margin:12px 0;"><span class="score-bar"><span class="score-fill" style="width:' + pct + '%;background:' + passColor + ';"></span></span></div>' +
+                    '<div style="font-size:14px;">得分率 <strong style="color:' + passColor + ';">' + pct + '%</strong></div>' +
+                    '<div style="margin-top:12px;"><span class="status-tag" style="background:' + passColor + '1a;color:' + passColor + ';padding:6px 16px;font-size:14px;">' +
+                    (r.pass === 1 ? '✅ 筛选通过：推荐进入面试环节' : '❌ 筛选不通过：与岗位要求有差距') +
+                    '</span></div>' +
+                '</div>' +
+                '<div style="border-top:1px solid #ebeef5;padding-top:16px;">' +
+                    '<div style="font-weight:600;margin-bottom:10px;">📋 规则执行明细</div>' +
+                    detailsHtml +
+                '</div>';
+        }
+
+        async function deleteApp(id) {
+            if (!confirm('确认删除该投递记录？')) return;
+            try { const json = await ATS.ajax(API + '/' + id, { method: 'DELETE' }); if (json.code === 0) { toast('删除成功', 'ok'); loadData(); } else alert('删除失败'); }
+            catch(e) { alert('删除失败: ' + e.message); }
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+        function escapeHtml(s) { if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+        function formatTime(t) { if(!t) return '-'; return String(t).substring(5,10) + ' ' + String(t).substring(11,16); }
+
+        loadData();
+    </script>
+    <script>document.addEventListener('DOMContentLoaded', function(){var b=document.getElementById('logoutBtn');if(b)b.addEventListener('click',function(){ATS.logout();});});</script>
+</body>
+</html>

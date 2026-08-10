@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - ATS 招聘系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f7fa; color: #303133; min-height: 100vh; display: flex; }
+        .sidebar { width: 220px; background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%); color: #fff; padding: 24px 0; flex-shrink: 0; min-height: 100vh; }
+        .sidebar .logo { padding: 0 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; }
+        .sidebar .logo h1 { font-size: 18px; font-weight: 600; }
+        .sidebar .logo p { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+        .menu-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; font-size: 14px; text-decoration: none; color: #fff; }
+        .menu-item:hover { background: rgba(255,255,255,0.1); }
+        .menu-item.active { background: rgba(255,255,255,0.15); border-left: 3px solid #67c23a; padding-left: 17px; font-weight: 500; }
+        .menu-icon { width: 18px; text-align: center; font-size: 16px; }
+        .main { flex: 1; display: flex; flex-direction: column; }
+        .header { background: #fff; height: 60px; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,21,41,0.08); }
+        .header .breadcrumb { color: #606266; font-size: 14px; }
+        .header .breadcrumb strong { color: #303133; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .header-right .date { color: #909399; font-size: 13px; }
+        .user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: #ecf5ff; border-radius: 20px; font-size: 13px; color: #409eff; }
+        .logout-btn{border:1px solid #fbc4c4;background:#fef0f0;color:#f56c6c;padding:6px 14px;border-radius:20px;font-size:13px;cursor:pointer;transition:all .2s}.logout-btn:hover{background:#f56c6c;color:#fff;border-color:#f56c6c}
+        .avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #409eff, #667eea); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        .content { padding: 24px 32px; flex: 1; }
+        .page-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+        .page-title span { font-size: 13px; color: #909399; font-weight: normal; margin-left: 8px; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; }
+        .search-box { display: flex; gap: 8px; flex: 1; }
+        .search-input { padding: 8px 14px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 14px; width: 300px; outline: none; transition: border-color 0.2s; }
+        .search-input:focus { border-color: #409eff; }
+        .btn { padding: 8px 20px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: #409eff; color: #fff; }
+        .btn-success { background: #67c23a; color: #fff; }
+        .btn-danger { background: #f56c6c; color: #fff; }
+        .btn-warning { background: #e6a23c; color: #fff; }
+        .btn-sm { padding: 4px 12px; font-size: 12px; }
+        .table-wrap { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { background: #fafafa; padding: 14px 24px; text-align: left; font-size: 13px; color: #909399; font-weight: 500; border-bottom: 1px solid #ebeef5; }
+        tbody td { padding: 14px 24px; font-size: 14px; color: #606266; border-bottom: 1px solid #f2f6fc; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f5f7fa; }
+        .role-tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; }
+        .role-admin { background: #fef0f0; color: #f56c6c; }
+        .role-hr { background: #ecf5ff; color: #409eff; }
+        .role-viewer { background: #f4f4f5; color: #909399; }
+        .empty { padding: 40px; text-align: center; color: #c0c4cc; font-size: 13px; }
+        .footer { text-align: center; padding: 16px; color: #909399; font-size: 12px; background: #fff; border-top: 1px solid #ebeef5; }
+        .actions { display: flex; gap: 8px; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #fff; border-radius: 8px; padding: 32px; width: 480px; max-width: 90%; }
+        .modal h2 { font-size: 18px; margin-bottom: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; color: #606266; margin-bottom: 6px; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px 12px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 14px; outline: none; }
+        .form-group input:focus, .form-group textarea:focus { border-color: #409eff; }
+        .form-group .hint { font-size: 12px; color: #909399; margin-top: 4px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo"><h1>🎯 ATS 招聘系统</h1><p>Applicant Tracking System</p></div>
+        <a class="menu-item" th:classappend="${activeMenu == 'dashboard'} ? 'active'" href="/dashboard"><span class="menu-icon">📊</span><span>数据看板</span></a>
+        <a class="menu-item" th:classappend="${activeMenu == 'positions'} ? 'active'" href="/page/positions"><span class="menu-icon">💼</span><span>职位管理</span></a>
+        <a class="menu-item" th:classappend="${activeMenu == 'candidates'} ? 'active'" href="/page/candidates"><span class="menu-icon">👥</span><span>候选人库</span></a>
+        <a class="menu-item" th:classappend="${activeMenu == 'applications'} ? 'active'" href="/page/applications"><span class="menu-icon">📨</span><span>投递记录</span></a>
+        <a class="menu-item" th:classappend="${activeMenu == 'rules'} ? 'active'" href="/page/rules"><span class="menu-icon">⚙️</span><span>筛选规则</span></a>
+        <a class="menu-item" th:classappend="${activeMenu == 'users'} ? 'active'" href="/page/users"><span class="menu-icon">👤</span><span>用户管理</span></a>
+        <a class="menu-item" href="/swagger-ui.html" target="_blank"><span class="menu-icon">🧪</span><span>API 文档</span></a>
+    </aside>
+
+    <div class="main">
+        <header class="header">
+            <div class="breadcrumb">🏠 首页 / <strong>用户管理</strong></div>
+            <div class="header-right">
+                <span class="date">📅 <span th:text="${today}">2026-08-10</span></span>
+                <div class="user-chip"><div class="avatar">管</div><span th:text="${user}">系统管理员</span></div>
+                <button type="button" class="logout-btn" id="logoutBtn" title="退出登录">🚪 退出</button>
+            </div>
+        </header>
+
+        <main class="content">
+            <div class="page-title">用户管理 <span>系统账号与权限管理</span></div>
+
+            <div class="toolbar">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="keyword" placeholder="搜索用户名或姓名..." onkeyup="if(event.key==='Enter') doSearch()">
+                    <button class="btn btn-primary" onclick="doSearch()">🔍 搜索</button>
+                </div>
+                <button class="btn btn-success" onclick="openCreateModal()">➕ 新增用户</button>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr><th>ID</th><th>用户名</th><th>姓名</th><th>角色</th><th>创建时间</th><th>操作</th></tr>
+                    </thead>
+                    <tbody id="dataBody">
+                        <tr><td colspan="6" class="empty">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <footer class="footer">© 2026 ATS 招聘管理系统 · Powered by Spring Boot 2.7.18 + MyBatis-Plus</footer>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2 id="modalTitle">新增用户</h2>
+            <input type="hidden" id="editId">
+            <div class="form-group"><label>用户名 *</label><input type="text" id="f_username" placeholder="登录账号"></div>
+            <div class="form-group"><label>姓名</label><input type="text" id="f_realName" placeholder="真实姓名"></div>
+            <div class="form-group"><label>角色</label><select id="f_role"><option value="ADMIN">ADMIN (管理员)</option><option value="HR">HR (人事)</option><option value="VIEWER">VIEWER (只读)</option></select></div>
+            <div class="form-group" id="pwdGroup"><label id="pwdLabel">密码 *</label><input type="password" id="f_password" placeholder="至少6位"><div class="hint" id="pwdHint">新建时必填；编辑时留空则不修改密码</div></div>
+            <div class="modal-actions">
+                <button class="btn" style="background:#f4f4f5;color:#606266;" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveUser()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="pwdModalOverlay">
+        <div class="modal">
+            <h2>重置密码</h2>
+            <input type="hidden" id="resetUserId">
+            <div class="form-group"><label>新密码 *</label><input type="password" id="f_newPassword" placeholder="请输入新密码"></div>
+            <div class="modal-actions">
+                <button class="btn" style="background:#f4f4f5;color:#606266;" onclick="closePwdModal()">取消</button>
+                <button class="btn btn-warning" onclick="submitResetPassword()">确认重置</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/ats-common.js"></script>
+    <script>
+        const API = '/api/users';
+        let currentPage = 1;
+
+        function roleClass(r) {
+            if (r === 'ADMIN') return 'role-admin';
+            if (r === 'HR') return 'role-hr';
+            return 'role-viewer';
+        }
+        function roleText(r) {
+            if (r === 'ADMIN') return '管理员';
+            if (r === 'HR') return 'HR 人事';
+            if (r === 'VIEWER') return '只读用户';
+            return r || '-';
+        }
+
+        async function loadData(keyword) {
+            const url = API + '?current=1&size=50' + (keyword ? '&keyword=' + encodeURIComponent(keyword) : '');
+            try {
+                const json = await ATS.ajax(url);
+                renderTable(json.data.records);
+            } catch(e) { document.getElementById('dataBody').innerHTML = '<tr><td colspan="6" class="empty">加载失败</td></tr>'; }
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById('dataBody');
+            if (!list || list.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty">暂无数据</td></tr>'; return; }
+            tbody.innerHTML = list.map(u => `
+                <tr>
+                    <td>${u.id}</td>
+                    <td style="color:#303133;font-weight:500;">${ATS.escapeHtml(u.username)}</td>
+                    <td>${ATS.escapeHtml(u.realName || '-')}</td>
+                    <td><span class="role-tag ${roleClass(u.role)}">${roleText(u.role)}</span></td>
+                    <td>${ATS.fmtTime(u.createdAt)}</td>
+                    <td><div class="actions">
+                        <button class="btn btn-warning btn-sm" onclick="openResetPwdModal(${u.id})">重置密码</button>
+                        <button class="btn btn-primary btn-sm" onclick="openEditModal(${u.id})">编辑</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">删除</button>
+                    </div></td>
+                </tr>`).join('');
+        }
+
+        function doSearch() { loadData(document.getElementById('keyword').value); }
+
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = '新增用户';
+            document.getElementById('editId').value = '';
+            ['f_username','f_realName','f_password'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('f_role').value = 'ADMIN';
+            document.getElementById('pwdLabel').textContent = '密码 *';
+            document.getElementById('pwdGroup').style.display = 'block';
+            document.getElementById('modalOverlay').classList.add('show');
+        }
+
+        async function openEditModal(id) {
+            try {
+                const json = await ATS.ajax(API + '/' + id);
+                const u = json.data;
+                document.getElementById('modalTitle').textContent = '编辑用户';
+                document.getElementById('editId').value = u.id;
+                document.getElementById('f_username').value = u.username || '';
+                document.getElementById('f_realName').value = u.realName || '';
+                document.getElementById('f_role').value = u.role || 'ADMIN';
+                document.getElementById('f_password').value = '';
+                document.getElementById('pwdLabel').textContent = '密码（留空则不改）';
+                document.getElementById('pwdGroup').style.display = 'block';
+                document.getElementById('modalOverlay').classList.add('show');
+            } catch(e) { alert('获取详情失败'); }
+        }
+
+        function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+        async function saveUser() {
+            const id = document.getElementById('editId').value;
+            const username = document.getElementById('f_username').value;
+            const realName = document.getElementById('f_realName').value;
+            const role = document.getElementById('f_role').value;
+            const password = document.getElementById('f_password').value;
+            if (!username) { alert('请填写用户名'); return; }
+            if (!id && !password) { alert('请填写密码'); return; }
+            try {
+                if (id) {
+                    const body = { username, realName, role };
+                    const json = await ATS.ajax(API + '/' + id, { method: 'PUT', body: body });
+                    if (json.code !== 0) { alert('保存失败'); return; }
+                    if (password) {
+                        const rp = await ATS.ajax(API + '/' + id + '/reset-password', { method: 'POST', body: { password } });
+                        if (rp.code !== 0) { alert('密码更新失败'); return; }
+                    }
+                } else {
+                    const body = { username, realName, role, password };
+                    const json = await ATS.ajax(API, { method: 'POST', body: body });
+                    if (json.code !== 0) { alert('保存失败'); return; }
+                }
+                closeModal(); loadData(document.getElementById('keyword').value);
+            } catch(e) { alert('保存失败: ' + e.message); }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('确认删除该用户？')) return;
+            try {
+                const json = await ATS.ajax(API + '/' + id, { method: 'DELETE' });
+                if (json.code === 0) loadData(document.getElementById('keyword').value);
+                else alert('删除失败');
+            } catch(e) { alert('删除失败: ' + e.message); }
+        }
+
+        function openResetPwdModal(id) {
+            document.getElementById('resetUserId').value = id;
+            document.getElementById('f_newPassword').value = '';
+            document.getElementById('pwdModalOverlay').classList.add('show');
+        }
+        function closePwdModal() { document.getElementById('pwdModalOverlay').classList.remove('show'); }
+
+        async function submitResetPassword() {
+            const id = document.getElementById('resetUserId').value;
+            const password = document.getElementById('f_newPassword').value;
+            if (!password) { alert('请输入新密码'); return; }
+            try {
+                const json = await ATS.ajax(API + '/' + id + '/reset-password', { method: 'POST', body: { password } });
+                if (json.code === 0) { closePwdModal(); alert('密码重置成功'); }
+                else alert('重置失败');
+            } catch(e) { alert('重置失败: ' + e.message); }
+        }
+
+        loadData();
+    </script>
+    <script>document.addEventListener('DOMContentLoaded', function(){var b=document.getElementById('logoutBtn');if(b)b.addEventListener('click',function(){ATS.logout();});});</script>
+</body>
+</html>

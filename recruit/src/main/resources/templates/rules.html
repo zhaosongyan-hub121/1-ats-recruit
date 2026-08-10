@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>筛选规则 - ATS 招聘系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f7fa; color: #303133; min-height: 100vh; display: flex; }
+        .sidebar { width: 220px; background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%); color: #fff; padding: 24px 0; flex-shrink: 0; min-height: 100vh; }
+        .sidebar .logo { padding: 0 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; }
+        .sidebar .logo h1 { font-size: 18px; font-weight: 600; }
+        .sidebar .logo p { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+        .menu-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; font-size: 14px; text-decoration: none; color: #fff; }
+        .menu-item:hover { background: rgba(255,255,255,0.1); }
+        .menu-item.active { background: rgba(255,255,255,0.15); border-left: 3px solid #67c23a; padding-left: 17px; font-weight: 500; }
+        .menu-icon { width: 18px; text-align: center; font-size: 16px; }
+        .main { flex: 1; display: flex; flex-direction: column; }
+        .header { background: #fff; height: 60px; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,21,41,0.08); }
+        .header .breadcrumb { color: #606266; font-size: 14px; }
+        .header .breadcrumb strong { color: #303133; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .header-right .date { color: #909399; font-size: 13px; }
+        .user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: #ecf5ff; border-radius: 20px; font-size: 13px; color: #409eff; }
+        .logout-btn{border:1px solid #fbc4c4;background:#fef0f0;color:#f56c6c;padding:6px 14px;border-radius:20px;font-size:13px;cursor:pointer;transition:all .2s}.logout-btn:hover{background:#f56c6c;color:#fff;border-color:#f56c6c}
+        .avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #909399, #606266); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        .content { padding: 24px 32px; flex: 1; }
+        .page-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+        .page-title span { font-size: 13px; color: #909399; font-weight: normal; margin-left: 8px; }
+        .toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+        .btn { padding: 8px 20px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: #409eff; color: #fff; }
+        .btn-success { background: #67c23a; color: #fff; }
+        .btn-danger { background: #f56c6c; color: #fff; }
+        .btn-sm { padding: 4px 12px; font-size: 12px; }
+        .table-wrap { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { background: #fafafa; padding: 14px 24px; text-align: left; font-size: 13px; color: #909399; font-weight: 500; border-bottom: 1px solid #ebeef5; }
+        tbody td { padding: 14px 24px; font-size: 14px; color: #606266; border-bottom: 1px solid #f2f6fc; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f5f7fa; }
+        .type-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+        .type-skill { background: #ecf5ff; color: #409eff; }
+        .type-keyword { background: #fdf6ec; color: #e6a23c; }
+        .type-experience { background: #f0f9eb; color: #67c23a; }
+        .enabled-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+        .tag-on { background: #f0f9eb; color: #67c23a; }
+        .tag-off { background: #f4f4f5; color: #c0c4cc; }
+        .empty { padding: 40px; text-align: center; color: #c0c4cc; font-size: 13px; }
+        .footer { text-align: center; padding: 16px; color: #909399; font-size: 12px; background: #fff; border-top: 1px solid #ebeef5; }
+        .actions { display: flex; gap: 8px; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #fff; border-radius: 8px; padding: 32px; width: 500px; max-width: 90%; }
+        .modal h2 { font-size: 18px; margin-bottom: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; color: #606266; margin-bottom: 6px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 14px; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: #409eff; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo"><h1>🎯 ATS 招聘系统</h1><p>Applicant Tracking System</p></div>
+        <a class="menu-item" href="/dashboard"><span class="menu-icon">📊</span><span>数据看板</span></a>
+        <a class="menu-item" href="/page/positions"><span class="menu-icon">💼</span><span>职位管理</span></a>
+        <a class="menu-item" href="/page/candidates"><span class="menu-icon">👥</span><span>候选人库</span></a>
+        <a class="menu-item" href="/page/applications"><span class="menu-icon">📨</span><span>投递记录</span></a>
+        <a class="menu-item active" href="/page/rules"><span class="menu-icon">⚙️</span><span>筛选规则</span></a>
+        <a class="menu-item" th:classappend="${activeMenu == 'users'} ? 'active'" href="/page/users"><span class="menu-icon">👤</span><span>用户管理</span></a>
+        <a class="menu-item" href="/swagger-ui.html" target="_blank"><span class="menu-icon">🧪</span><span>API 文档</span></a>
+    </aside>
+
+    <div class="main">
+        <header class="header">
+            <div class="breadcrumb">🏠 首页 / <strong>筛选规则</strong></div>
+            <div class="header-right">
+                <span class="date">📅 <span th:text="${today}">2026-08-10</span></span>
+                <div class="user-chip"><div class="avatar">管</div><span th:text="${user}">系统管理员</span></div>
+                <button type="button" class="logout-btn" id="logoutBtn" title="退出登录">🚪 退出</button>
+            </div>
+        </header>
+
+        <main class="content">
+            <div class="page-title">筛选规则 <span>配置智能筛选引擎的匹配规则</span></div>
+            <div class="toolbar"><button class="btn btn-success" onclick="openCreateModal()">➕ 新增规则</button></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>ID</th><th>规则名称</th><th>类型</th><th>期望值</th><th>匹配模式</th><th>权重</th><th>状态</th><th>操作</th></tr></thead>
+                    <tbody id="dataBody"><tr><td colspan="8" class="empty">加载中...</td></tr></tbody>
+                </table>
+            </div>
+        </main>
+        <footer class="footer">© 2026 ATS 招聘管理系统 · Powered by Spring Boot 2.7.18 + MyBatis-Plus</footer>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2 id="modalTitle">新增规则</h2>
+            <input type="hidden" id="editId">
+            <div class="form-group"><label>规则名称 *</label><input type="text" id="f_name" placeholder="如：核心技能匹配"></div>
+            <div class="form-group"><label>规则类型 *</label>
+                <select id="f_ruleType"><option value="SKILL">SKILL - 技能匹配</option><option value="KEYWORD">KEYWORD - 关键词匹配</option><option value="EXPERIENCE">EXPERIENCE - 经验年限</option></select>
+            </div>
+            <div class="form-group"><label>目标字段 *</label>
+                <select id="f_targetField"><option value="skills">skills</option><option value="resume_text">resume_text</option><option value="experience_years">experience_years</option></select>
+            </div>
+            <div class="form-group"><label>期望值（逗号分隔）*</label><input type="text" id="f_expectedValues" placeholder="如：Java,SpringBoot,MySQL"></div>
+            <div class="form-group"><label>匹配模式 *</label>
+                <select id="f_matchMode"><option value="ANY">ANY - 匹配任一即可</option><option value="ALL">ALL - 必须全匹配</option><option value="MIN">MIN - 最小值（经验）</option></select>
+            </div>
+            <div class="form-group"><label>权重（分）</label><input type="number" id="f_weight" value="10" min="1" max="100"></div>
+            <div class="form-group"><label>绑定职位ID（留空=通用规则）</label><input type="number" id="f_positionId" placeholder="如：1（留空则通用）"></div>
+            <div class="form-group"><label>启用状态</label><select id="f_enabled"><option value="1">启用</option><option value="0">禁用</option></select></div>
+            <div class="modal-actions">
+                <button class="btn" style="background:#f4f4f5;color:#606266;" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveRule()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/ats-common.js"></script>
+    <script>
+        const API = '/api/screen-rules';
+
+        async function loadData() {
+            try {
+                const json = await ATS.ajax(API + '?current=1&size=50');
+                renderTable(json.data.records);
+            } catch(e) { document.getElementById('dataBody').innerHTML = '<tr><td colspan="8" class="empty">加载失败</td></tr>'; }
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById('dataBody');
+            if (!list || list.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="empty">暂无规则</td></tr>'; return; }
+            const typeMap = {SKILL:['type-skill','🔧'],KEYWORD:['type-keyword','🔍'],EXPERIENCE:['type-experience','⏰']};
+            tbody.innerHTML = list.map(r => {
+                const [cls, icon] = typeMap[r.ruleType] || ['type-skill','?'];
+                return `<tr>
+                    <td>${r.id}</td>
+                    <td style="color:#303133;font-weight:500;">${escapeHtml(r.name)}</td>
+                    <td><span class="type-tag ${cls}">${icon} ${r.ruleType}</span></td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(r.expectedValues)}</td>
+                    <td>${r.matchMode}</td>
+                    <td><strong>${r.weight}</strong></td>
+                    <td><span class="enabled-tag ${r.enabled===1?'tag-on':'tag-off'}">${r.enabled===1?'✅ 启用':'⏸ 禁用'}</span></td>
+                    <td><div class="actions">
+                        <button class="btn btn-primary btn-sm" onclick="openEditModal(${r.id})">编辑</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteRule(${r.id})">删除</button>
+                    </div></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = '新增规则';
+            document.getElementById('editId').value = '';
+            ['f_name','f_expectedValues','f_positionId'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('f_ruleType').value = 'SKILL';
+            document.getElementById('f_targetField').value = 'skills';
+            document.getElementById('f_matchMode').value = 'ANY';
+            document.getElementById('f_weight').value = '10';
+            document.getElementById('f_enabled').value = '1';
+            document.getElementById('modalOverlay').classList.add('show');
+        }
+
+        async function openEditModal(id) {
+            try {
+                const json = await ATS.ajax(API + '/' + id);
+                const r = json.data;
+                document.getElementById('modalTitle').textContent = '编辑规则';
+                document.getElementById('editId').value = r.id;
+                document.getElementById('f_name').value = r.name || '';
+                document.getElementById('f_ruleType').value = r.ruleType || 'SKILL';
+                document.getElementById('f_targetField').value = r.targetField || 'skills';
+                document.getElementById('f_expectedValues').value = r.expectedValues || '';
+                document.getElementById('f_matchMode').value = r.matchMode || 'ANY';
+                document.getElementById('f_weight').value = r.weight || 10;
+                document.getElementById('f_positionId').value = r.positionId || '';
+                document.getElementById('f_enabled').value = r.enabled != null ? r.enabled : 1;
+                document.getElementById('modalOverlay').classList.add('show');
+            } catch(e) { alert('获取详情失败'); }
+        }
+
+        function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+        async function saveRule() {
+            const id = document.getElementById('editId').value;
+            const posId = document.getElementById('f_positionId').value;
+            const body = {
+                name: document.getElementById('f_name').value,
+                ruleType: document.getElementById('f_ruleType').value,
+                targetField: document.getElementById('f_targetField').value,
+                expectedValues: document.getElementById('f_expectedValues').value,
+                matchMode: document.getElementById('f_matchMode').value,
+                weight: parseInt(document.getElementById('f_weight').value) || 10,
+                positionId: posId ? parseInt(posId) : null,
+                enabled: parseInt(document.getElementById('f_enabled').value)
+            };
+            if (!body.name || !body.expectedValues) { alert('请填写规则名称和期望值'); return; }
+            try {
+                const url = id ? API + '/' + id : API;
+                const method = id ? 'PUT' : 'POST';
+                const json = await ATS.ajax(url, { method, body: body });
+                if (json.code === 0) { closeModal(); loadData(); }
+                else { alert('保存失败'); }
+            } catch(e) { alert('保存失败: ' + e.message); }
+        }
+
+        async function deleteRule(id) {
+            if (!confirm('确认删除该规则？')) return;
+            try { const json = await ATS.ajax(API + '/' + id, { method: 'DELETE' }); if (json.code === 0) loadData(); else alert('删除失败'); }
+            catch(e) { alert('删除失败: ' + e.message); }
+        }
+
+        function escapeHtml(s) { if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        loadData();
+    </script>
+    <script>document.addEventListener('DOMContentLoaded', function(){var b=document.getElementById('logoutBtn');if(b)b.addEventListener('click',function(){ATS.logout();});});</script>
+</body>
+</html>
