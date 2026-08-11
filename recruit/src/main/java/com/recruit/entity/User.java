@@ -8,9 +8,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/**
- * 系统用户
- */
 @Data
 @TableName("sys_user")
 public class User {
@@ -20,13 +17,20 @@ public class User {
 
     private String username;
 
-    /** BCrypt 加密 */
     private String password;
 
     private String realName;
 
-    /** ADMIN / INTERVIEWER */
+    private String email;
+
+    private String phone;
+
+    /** ADMIN / HR / CANDIDATE */
     private String role;
+
+    private String company;
+
+    private String avatar;
 
     private LocalDateTime createdAt;
 

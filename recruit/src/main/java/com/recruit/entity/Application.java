@@ -8,9 +8,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/**
- * 投递记录
- */
 @Data
 @TableName("application")
 public class Application {
@@ -20,12 +17,20 @@ public class Application {
 
     private Long candidateId;
 
+    private Long userId;
+
     private Long positionId;
 
-    /** PENDING / REVIEWED / ACCEPTED / REJECTED */
+    /** SUBMITTED/SCREENING_PASS/INTERVIEWING/INTERVIEWED/OFFER/ACCEPTED/REJECTED */
     private String status;
 
+    private Integer currentRound;
+
     private String coverLetter;
+
+    private String hrRemark;
+
+    private String statusLog;
 
     private LocalDateTime createdAt;
 

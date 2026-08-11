@@ -36,14 +36,6 @@ public class DashboardController {
     private final ScreenResultMapper screenResultMapper;
 
     /**
-     * 根路径：直接跳转到管理后台首页
-     */
-    @GetMapping("/")
-    public String index() {
-        return "redirect:/dashboard";
-    }
-
-    /**
      * 管理后台主界面（Dashboard）
      * 展示：顶部导航、4 张统计卡片、职位列表、最近投递列表
      */
@@ -151,14 +143,6 @@ public class DashboardController {
         model.addAttribute("today", java.time.LocalDate.now().toString());
         model.addAttribute("user", "系统管理员");
         return "dashboard";
-    }
-
-    /**
-     * 登录页
-     */
-    @GetMapping("/login")
-    public String loginPage() {
-        return "login";
     }
 
     // ==================== 子页面路由 ====================

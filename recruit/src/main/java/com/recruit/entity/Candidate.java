@@ -8,9 +8,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/**
- * 候选人
- */
 @Data
 @TableName("candidate")
 public class Candidate {
@@ -18,19 +15,23 @@ public class Candidate {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    private Long userId;
+
     private String name;
 
     private String email;
 
     private String phone;
 
-    /** 逗号分隔：Java,Spring,MySQL */
     private String skills;
 
     private Integer experienceYears;
 
-    /** 简历纯文本，用于关键词搜索 */
     private String resumeText;
+
+    private String educationLevel;
+
+    private String school;
 
     private LocalDateTime createdAt;
 

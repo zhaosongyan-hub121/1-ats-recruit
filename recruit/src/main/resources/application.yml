@@ -5,10 +5,26 @@ spring:
   application:
     name: recruit
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:recruit}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:1234}
+    # 默认使用 H2 内存数据库（零配置开箱即用）
+    # 设置环境变量 USE_MYSQL=true 可切换到 MySQL
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
+    url: ${DB_URL:jdbc:h2:mem:recruit;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+  # H2 控制台（开发调试用，访问 http://localhost:8080/h2-console）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+  # 启动时自动初始化数据库（建表 + 演示数据）
+  sql:
+    init:
+      mode: always
+      schema-locations: ${DB_SCHEMA:classpath:db/schema-h2.sql}
+      encoding: UTF-8
+      continue-on-error: false
   # Redis 缓存（未启动时不影响启动，CacheService 自动降级）
   redis:
     host: ${REDIS_HOST:localhost}
@@ -54,3 +70,21 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     show-common-parameters: true
+
+---
+# MySQL 配置（启动时加 --spring.profiles.active=mysql 或设置 USE_MYSQL=true 启用）
+spring:
+  config:
+    activate:
+      on-profile: mysql
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:recruit}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:1234}
+  sql:
+    init:
+      schema-locations: classpath:db/schema.sql
+  h2:
+    console:
+      enabled: false

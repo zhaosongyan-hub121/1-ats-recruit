@@ -20,12 +20,21 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 1) REST API 鉴权：除登录接口、Swagger 文档外全部拦截
+        // 1) REST API 鉴权：除了白名单路径外，全部拦截
         registry.addInterceptor(jwtInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
+                        // 鉴权接口：登录/注册/登出/me
                         "/api/auth/login",
-                        "/api/portal/**",
+                        "/api/auth/register",
+                        "/api/auth/logout",
+                        "/api/auth/me",
+                        // 求职者端浏览类接口（匿名可访问）
+                        "/api/portal/positions/**",
+                        "/api/portal/positions",
+                        "/api/portal/stats",
+                        "/api/portal/categories/**",
+                        "/api/portal/locations/**",
                         // Swagger / OpenAPI
                         "/api-docs/**",
                         "/swagger-ui.html",
@@ -33,7 +42,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/webjars/**"
                 );
 
-        // 2) 页面路由鉴权：进看板及子页面前必须先登录，否则 302 跳 /login
+        // 2) 页面路由鉴权：管理端页面必须先登录
         registry.addInterceptor(pageAuthInterceptor)
                 .addPathPatterns("/dashboard", "/page/**")
                 .excludePathPatterns();

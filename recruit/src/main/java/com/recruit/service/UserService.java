@@ -9,6 +9,7 @@ import com.recruit.mapper.UserMapper;
 import com.recruit.security.JwtUtils;
 import com.recruit.dto.LoginRequest;
 import com.recruit.dto.LoginResponse;
+import com.recruit.dto.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -30,7 +31,37 @@ public class UserService {
             throw new BusinessException(401, "密码错误");
         }
         String token = jwtUtils.generate(user.getId(), user.getUsername(), user.getRole());
-        return new LoginResponse(token, user.getId(), user.getUsername(), user.getRealName(), user.getRole());
+        return new LoginResponse(token, user.getId(), user.getUsername(), user.getRealName(), user.getRole(),
+                user.getEmail(), user.getPhone(), user.getCompany(), user.getAvatar());
+    }
+
+    public LoginResponse register(RegisterRequest req) {
+        if (!req.getPassword().equals(req.getConfirmPassword())) {
+            throw new BusinessException(400, "两次密码输入不一致");
+        }
+        User exists = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getUsername, req.getUsername()));
+        if (exists != null) {
+            throw new BusinessException(400, "用户名已被注册");
+        }
+        if (StringUtils.hasText(req.getEmail())) {
+            User emailExists = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                    .eq(User::getEmail, req.getEmail()));
+            if (emailExists != null) {
+                throw new BusinessException(400, "该邮箱已被注册");
+            }
+        }
+        User user = new User();
+        user.setUsername(req.getUsername());
+        user.setPassword(BCrypt.hashpw(req.getPassword(), BCrypt.gensalt()));
+        user.setRealName(req.getRealName());
+        user.setEmail(req.getEmail());
+        user.setPhone(req.getPhone());
+        user.setRole("CANDIDATE");
+        userMapper.insert(user);
+        String token = jwtUtils.generate(user.getId(), user.getUsername(), user.getRole());
+        return new LoginResponse(token, user.getId(), user.getUsername(), user.getRealName(), user.getRole(),
+                user.getEmail(), user.getPhone(), user.getCompany(), user.getAvatar());
     }
 
     public Page<User> page(long current, long size, String keyword) {

@@ -8,9 +8,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/**
- * 职位（表名 job_position 规避 MySQL 关键字 position）
- */
 @Data
 @TableName("job_position")
 public class Position {
@@ -20,6 +17,10 @@ public class Position {
 
     private String title;
 
+    private String companyName;
+
+    private String companyLogo;
+
     private String department;
 
     private String description;
@@ -28,6 +29,19 @@ public class Position {
 
     /** OPEN / CLOSED */
     private String status;
+
+    /** CAMPUS(校招) / SOCIAL(社招) / INTERN(实习) */
+    private String category;
+
+    private String location;
+
+    private String salary;
+
+    private String education;
+
+    private String experience;
+
+    private Long publishUserId;
 
     private LocalDateTime createdAt;
 

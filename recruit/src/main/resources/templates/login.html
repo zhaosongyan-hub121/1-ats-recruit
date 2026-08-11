@@ -23,7 +23,7 @@
             background: #fff;
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(31, 45, 61, 0.2);
-            padding: 40px 36px;
+            padding: 40px 36px 28px;
             animation: cardIn .45s ease;
         }
         @keyframes cardIn { from { opacity: 0; transform: translateY(16px);} to { opacity:1; transform:none;} }
@@ -53,15 +53,18 @@
         .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(64,158,255,.35); }
         .submit-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
         .tip {
-            margin-top: 20px; padding: 12px 14px; background: #ecf5ff; color: #409eff;
-            font-size: 13px; border-radius: 8px; line-height: 1.6;
+            margin-top: 16px; padding: 10px 14px; background: #ecf5ff; color: #409eff;
+            font-size: 12px; border-radius: 8px; line-height: 1.6;
         }
         .error {
             margin-bottom: 16px; padding: 10px 14px; background: #fef0f0; color: #f56c6c;
             border-radius: 8px; font-size: 13px; display: none;
         }
         .error.show { display: block; }
-        .footer { text-align: center; margin-top: 24px; color: #c0c4cc; font-size: 12px; }
+        .links { text-align: center; margin-top: 20px; font-size: 13px; color: #909399; }
+        .links a { color: #409eff; text-decoration: none; margin: 0 8px; }
+        .links a:hover { text-decoration: underline; }
+        .footer { text-align: center; margin-top: 18px; color: #c0c4cc; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -69,7 +72,7 @@
         <div class="logo">
             <div class="badge">🎯</div>
             <h1>ATS 招聘系统</h1>
-            <p>Applicant Tracking System · 企业管理后台</p>
+            <p>登录后可投递职位 / 进入管理后台</p>
         </div>
 
         <div id="errorBox" class="error">用户名或密码错误</div>
@@ -77,19 +80,26 @@
         <form id="loginForm" autocomplete="off">
             <div class="field">
                 <label for="username">用户名</label>
-                <input id="username" type="text" placeholder="请输入用户名（演示：admin）" value="admin" required>
+                <input id="username" type="text" placeholder="请输入用户名" required autofocus>
             </div>
             <div class="field">
                 <label for="password">密码</label>
-                <input id="password" type="password" placeholder="请输入密码（演示：admin123）" value="admin123" required>
+                <input id="password" type="password" placeholder="请输入密码" required>
             </div>
             <button type="submit" class="submit-btn" id="submitBtn">登 录</button>
         </form>
 
         <div class="tip">
-            💡 <strong>演示账号</strong><br>
-            用户名：<code>admin</code>　密码：<code>admin123</code><br>
-            登录成功后会获取 JWT Token，后续请求自动携带。
+            💡 <strong>演示账号</strong>：<br>
+            · 管理员：<code>admin</code> / <code>admin123</code><br>
+            · HR（腾讯/阿里/字节）：<code>hr_tencent</code> / <code>admin123</code><br>
+            · 求职者请先 <a href="/register" style="color:#409eff;text-decoration:underline">注册账号</a>
+        </div>
+
+        <div class="links">
+            <a href="/register">注册新账号</a>
+            <span style="color:#dcdfe6">|</span>
+            <a href="/portal">返回职位首页</a>
         </div>
 
         <div class="footer">© 2026 ATS · Spring Boot 2.7.18 + JWT + Thymeleaf</div>
@@ -99,14 +109,19 @@
         const TOKEN_KEY = 'ATS_TOKEN';
         const USER_KEY  = 'ATS_USER';
 
-        // 已登录直接进看板
-        (function () {
-            if (localStorage.getItem(TOKEN_KEY)) { window.location.replace('/dashboard'); }
-        })();
+        // 获取 redirect 参数
+        const urlParams = new URLSearchParams(location.search);
+        const redirect = urlParams.get('redirect') || '';
 
         const form = document.getElementById('loginForm');
         const errorBox = document.getElementById('errorBox');
         const submitBtn = document.getElementById('submitBtn');
+
+        // 更新注册链接带上 redirect
+        const registerLinks = document.querySelectorAll('a[href="/register"]');
+        registerLinks.forEach(a => {
+            a.href = redirect ? '/register?redirect=' + encodeURIComponent(redirect) : '/register';
+        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -125,9 +140,17 @@
                 if (json.code === 0 && json.data && json.data.token) {
                     localStorage.setItem(TOKEN_KEY, json.data.token);
                     localStorage.setItem(USER_KEY, JSON.stringify(json.data));
-                    window.location.replace('/dashboard');
+                    // 根据角色跳转
+                    const role = json.data.role;
+                    let target;
+                    if (role === 'ADMIN' || role === 'HR' || role === 'VIEWER') {
+                        target = '/dashboard';
+                    } else {
+                        target = redirect || '/portal';
+                    }
+                    window.location.replace(target);
                 } else {
-                    errorBox.innerText = json.message || json.msg || '登录失败，请检查账号密码';
+                    errorBox.innerText = json.message || '登录失败，请检查账号密码';
                     errorBox.classList.add('show');
                 }
             } catch (err) {
