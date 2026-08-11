@@ -1,0 +1,36 @@
+# 测试环境配置（H2 内存数据库，CI 友好，无需外部 MySQL/Redis）
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:recruit_test;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema-h2.sql
+  redis:
+    host: localhost
+    port: 6379
+  thymeleaf:
+    cache: true
+
+# MyBatis-Plus 测试配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# JWT 测试配置
+jwt:
+  secret: test-secret-key-for-unit-tests-only
+  expire-hours: 1
+
+logging:
+  level:
+    com.recruit: warn

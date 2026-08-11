@@ -6,14 +6,14 @@ spring:
     name: recruit
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/recruit?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: root
-    password: 1234
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:recruit}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:1234}
   # Redis 缓存（未启动时不影响启动，CacheService 自动降级）
   redis:
-    host: localhost
-    port: 6379
-    database: 0
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    database: ${REDIS_DATABASE:0}
     timeout: 3000
     lettuce:
       pool:
@@ -44,8 +44,8 @@ logging:
 
 # JWT 鉴权配置
 jwt:
-  secret: recruit-secret-key-please-change-in-production-2026
-  expire-hours: 8
+  secret: ${JWT_SECRET:recruit-secret-key-please-change-in-production-2026}
+  expire-hours: ${JWT_EXPIRE_HOURS:8}
 
 # Springdoc OpenAPI 配置
 springdoc:
