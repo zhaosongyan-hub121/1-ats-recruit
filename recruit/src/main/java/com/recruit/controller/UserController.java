@@ -12,6 +12,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * 用户管理控制器
+ * <p>
+ * 提供系统用户的增删改查、分页搜索以及密码重置能力。
+ * 密码重置仅限管理员调用，新建/重置密码均以明文入参，由服务端进行 BCrypt 哈希后存储。
+ * </p>
+ */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -20,6 +27,15 @@ public class UserController {
 
     private final UserService userService;
 
+    /**
+     * 分页查询用户列表
+     * <p>支持按用户名/姓名关键词模糊搜索，结果按创建时间倒序返回。</p>
+     *
+     * @param current 页码，从 1 开始
+     * @param size    每页条数
+     * @param keyword 搜索关键词，可为空
+     * @return 用户分页数据
+     */
     @GetMapping
     @Operation(summary = "分页查询用户", description = "支持关键词模糊搜索（用户名/姓名），按创建时间倒序")
     public R<Page<User>> page(
@@ -29,12 +45,25 @@ public class UserController {
         return R.ok(userService.page(current, size, keyword));
     }
 
+    /**
+     * 根据 ID 获取用户详情
+     *
+     * @param id 用户 ID
+     * @return 用户详情
+     */
     @GetMapping("/{id}")
     @Operation(summary = "用户详情")
     public R<User> get(@Parameter(description = "用户ID") @PathVariable Long id) {
         return R.ok(userService.get(id));
     }
 
+    /**
+     * 新建用户
+     * <p>body 中 password 为明文，服务端自动 BCrypt 哈希；role 为空时默认 ADMIN。</p>
+     *
+     * @param body 用户信息，包含 username、realName、role、password
+     * @return 新建用户的 ID
+     */
     @PostMapping
     @Operation(summary = "新建用户", description = "body 中 password 为明文，服务端自动 BCrypt 哈希；role 为空默认 ADMIN")
     public R<Long> create(@RequestBody Map<String, Object> body) {
@@ -46,6 +75,14 @@ public class UserController {
         return R.ok(userService.create(user, rawPassword));
     }
 
+    /**
+     * 更新用户基本信息
+     * <p>仅更新 username、realName、role 字段，不涉及密码。</p>
+     *
+     * @param id   用户 ID（以路径参数为准）
+     * @param user 用户更新内容
+     * @return 空结果
+     */
     @PutMapping("/{id}")
     @Operation(summary = "更新用户", description = "只更新 username、realName、role，不改密码")
     public R<Void> update(
@@ -56,6 +93,12 @@ public class UserController {
         return R.ok();
     }
 
+    /**
+     * 删除用户（逻辑删除）
+     *
+     * @param id 用户 ID
+     * @return 空结果
+     */
     @DeleteMapping("/{id}")
     @Operation(summary = "删除用户（逻辑删除）")
     public R<Void> delete(@Parameter(description = "用户ID") @PathVariable Long id) {
@@ -63,6 +106,14 @@ public class UserController {
         return R.ok();
     }
 
+    /**
+     * 重置用户密码（仅管理员）
+     * <p>body 中 password 为明文新密码，服务端自动 BCrypt 哈希后存储。</p>
+     *
+     * @param id   用户 ID
+     * @param body 请求体，需包含 password 字段
+     * @return 空结果
+     */
     @PostMapping("/{id}/reset-password")
     @Operation(summary = "重置用户密码", description = "body {password: 明文新密码}，服务端自动 BCrypt 哈希")
     public R<Void> resetPassword(

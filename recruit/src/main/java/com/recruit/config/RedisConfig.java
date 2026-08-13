@@ -12,10 +12,19 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+/**
+ * Redis 配置，配置 RedisTemplate 的序列化策略
+ */
 @Configuration
 @ConditionalOnClass(RedisTemplate.class)
 public class RedisConfig {
 
+    /**
+     * 自定义 RedisTemplate，key 使用 String 序列化，value 使用 Jackson JSON 序列化以支持对象存储
+     *
+     * @param factory Redis 连接工厂
+     * @return 配置好序列化策略的 RedisTemplate
+     */
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();

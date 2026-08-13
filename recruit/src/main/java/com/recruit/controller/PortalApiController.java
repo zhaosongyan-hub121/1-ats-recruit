@@ -18,6 +18,13 @@ import javax.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 求职者门户 API 控制器
+ * <p>
+ * 面向求职者门户前端，提供岗位浏览、简历投递、职位收藏、个人中心等公开/登录接口。
+ * 其中岗位浏览、统计等接口匿名可访问；投递、收藏、个人中心相关接口需要求职者登录。
+ * </p>
+ */
 @RestController
 @RequestMapping("/api/portal")
 @RequiredArgsConstructor
@@ -30,6 +37,12 @@ public class PortalApiController {
     private final UserMapper userMapper;
     private final FavoriteMapper favoriteMapper;
 
+    /**
+     * 获取职位分类列表
+     * <p>返回固定枚举：全部、社招、校招、实习。</p>
+     *
+     * @return 分类列表，每项包含 value 与 label
+     */
     @GetMapping("/categories")
     @Operation(summary = "获取职位分类列表")
     public R<List<Map<String, String>>> categories() {
@@ -43,6 +56,12 @@ public class PortalApiController {
         return R.ok(list);
     }
 
+    /**
+     * 获取所有有招聘岗位的公司列表
+     * <p>查询处于 OPEN 状态的岗位所属公司并去重，按公司名升序返回。</p>
+     *
+     * @return 公司名称列表
+     */
     @GetMapping("/companies")
     @Operation(summary = "获取所有有招聘岗位的公司列表（去重）")
     public R<List<String>> companies() {
@@ -61,6 +80,23 @@ public class PortalApiController {
         return R.ok(list);
     }
 
+    /**
+     * 分页获取招聘中的岗位列表
+     * <p>仅返回状态为 OPEN 的岗位，支持分类、地点、关键词、公司、部门、薪资、经验、学历等条件筛选；
+     * 若用户已登录则附加 favorited 字段标识是否已收藏。</p>
+     *
+     * @param current    页码，从 1 开始
+     * @param size       每页条数
+     * @param category   分类：SOCIAL/CAMPUS/INTERN，可为空
+     * @param location   工作地点，可为空
+     * @param keyword    关键词（标题/描述/要求/公司名模糊匹配），可为空
+     * @param company    公司名称模糊匹配，可为空
+     * @param department 部门模糊匹配，可为空
+     * @param salary     薪资区间或关键字，可为空
+     * @param experience 经验要求，可为空
+     * @param education  学历要求，可为空
+     * @return 分页结果，包含 records、total、current、size、pages
+     */
     @GetMapping("/positions")
     @Operation(summary = "分页获取招聘中职位（支持条件筛选）")
     public R<Map<String, Object>> listPositions(
@@ -143,6 +179,13 @@ public class PortalApiController {
         return R.ok(data);
     }
 
+    /**
+     * 获取岗位详情
+     * <p>仅返回状态为 OPEN 的岗位；若用户已登录则附加 favorited 字段。</p>
+     *
+     * @param id 岗位 ID
+     * @return 岗位详情，岗位不存在或已关闭时抛出 404
+     */
     @GetMapping("/positions/{id}")
     @Operation(summary = "获取职位详情")
     public R<Map<String, Object>> positionDetail(@PathVariable Long id) {
@@ -169,6 +212,14 @@ public class PortalApiController {
         return R.ok(m);
     }
 
+    /**
+     * 投递职位（需登录）
+     * <p>校验登录态与岗位有效性，禁止同一用户对同一岗位重复投递；
+     * 自动查找或创建候选人档案，并写入状态为 SUBMITTED 的投递记录与状态日志。</p>
+     *
+     * @param req 投递请求，包含 positionId 与候选人简历信息
+     * @return 包含 applicationId 与 status 的结果
+     */
     @PostMapping("/applications")
     @Operation(summary = "投递职位（需登录）")
     public R<Map<String, Object>> apply(@RequestBody @Valid PortalApplyRequest req) {
@@ -231,6 +282,13 @@ public class PortalApiController {
 
     // ============ 收藏相关 ============
 
+    /**
+     * 切换岗位收藏状态（需登录）
+     * <p>已收藏则取消收藏，未收藏则新增收藏。</p>
+     *
+     * @param positionId 岗位 ID
+     * @return favorited 字段标识收藏结果（true=已收藏，false=已取消）
+     */
     @PostMapping("/favorites/{positionId}")
     @Operation(summary = "收藏/取消收藏职位（需登录，切换状态）")
     public R<Map<String, Object>> toggleFavorite(@PathVariable Long positionId) {
@@ -258,6 +316,13 @@ public class PortalApiController {
         return R.ok(res);
     }
 
+    /**
+     * 分页获取我的收藏岗位列表（需登录）
+     *
+     * @param current 页码，从 1 开始
+     * @param size    每页条数
+     * @return 分页结果，包含收藏记录及对应岗位信息
+     */
     @GetMapping("/me/favorites")
     @Operation(summary = "我的收藏职位列表（需登录）")
     public R<Map<String, Object>> myFavorites(
@@ -302,6 +367,15 @@ public class PortalApiController {
 
     // ============ 个人中心 ============
 
+    /**
+     * 分页获取我的投递记录（需登录）
+     * <p>返回投递记录及关联岗位信息，结果按创建时间倒序，支持按状态过滤。</p>
+     *
+     * @param current 页码，从 1 开始
+     * @param size     每页条数
+     * @param status   投递状态过滤，可为空
+     * @return 分页结果，包含投递记录及岗位摘要信息
+     */
     @GetMapping("/me/applications")
     @Operation(summary = "我的投递记录（需登录）")
     public R<Map<String, Object>> myApplications(
@@ -352,6 +426,12 @@ public class PortalApiController {
         return R.ok(data);
     }
 
+    /**
+     * 获取我的个人资料与简历信息（需登录）
+     * <p>合并用户基本信息与候选人简历信息返回。</p>
+     *
+     * @return 包含用户基本信息和简历字段的资料数据
+     */
     @GetMapping("/me/profile")
     @Operation(summary = "获取我的简历信息（需登录）")
     public R<Map<String, Object>> myProfile() {
@@ -376,6 +456,14 @@ public class PortalApiController {
         return R.ok(data);
     }
 
+    /**
+     * 更新我的个人资料与简历（需登录）
+     * <p>同时更新用户基本信息（真实姓名、邮箱、电话）与候选人简历字段（技能、经验、学历等）。
+     * 若候选人档案不存在则自动创建。</p>
+     *
+     * @param body 更新字段，支持 realName、email、phone、name、skills、experienceYears、resumeText、educationLevel、school
+     * @return 空结果
+     */
     @PutMapping("/me/profile")
     @Operation(summary = "更新我的个人信息/简历（需登录）")
     public R<Void> updateProfile(@RequestBody Map<String, Object> body) {
@@ -409,6 +497,12 @@ public class PortalApiController {
         return R.ok();
     }
 
+    /**
+     * 首页统计数据（匿名可访问）
+     * <p>统计招聘中岗位总数及各分类（社招/校招/实习）数量，以及有招聘岗位的公司数量。</p>
+     *
+     * @return 包含 total、social、campus、intern、companies 字段的统计结果
+     */
     @GetMapping("/stats")
     @Operation(summary = "首页统计数据（匿名可访问）")
     public R<Map<String, Object>> stats() {
@@ -454,6 +548,12 @@ public class PortalApiController {
                 .stream().map(Favorite::getPositionId).collect(Collectors.toList());
     }
 
+    /**
+     * 将投递状态枚举值映射为中文展示文本
+     *
+     * @param status 状态枚举值，例如 SUBMITTED、INTERVIEWING、OFFER 等
+     * @return 状态对应的中文文本，未知状态返回 "未知" 或原值
+     */
     public static String statusText(String status) {
         if (status == null) return "未知";
         switch (status) {

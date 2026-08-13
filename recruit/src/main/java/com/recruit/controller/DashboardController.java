@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 
 /**
- * 主界面 Dashboard 控制器
- * 服务端渲染：返回首页、登录页等 Thymeleaf 模板
+ * 后台 Dashboard 控制器
+ * <p>
+ * 为 HR 和管理员提供数据统计看板与各业务子页面的服务端渲染入口。
+ * 基于 Thymeleaf 模板渲染：主看板聚合统计卡片、岗位/投递列表、图表数据及最近筛选结果。
+ * </p>
  */
 @Hidden
 @Controller
@@ -36,8 +39,12 @@ public class DashboardController {
     private final ScreenResultMapper screenResultMapper;
 
     /**
-     * 管理后台主界面（Dashboard）
-     * 展示：顶部导航、4 张统计卡片、职位列表、最近投递列表
+     * 管理后台主看板页面
+     * <p>聚合统计卡片（岗位/候选人/投递/筛选通过数）、职位投递分布饼图、
+     * 筛选通过率饼图、最近 6 条岗位、最近 5 条投递及最近 5 条筛选结果。</p>
+     *
+     * @param model Spring MVC 模型，用于向模板注入统计数据与列表
+     * @return Thymeleaf 模板名 "dashboard"
      */
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -147,7 +154,12 @@ public class DashboardController {
 
     // ==================== 子页面路由 ====================
 
-    /** 职位管理页 */
+    /**
+     * 职位管理页
+     *
+     * @param model Spring MVC 模型
+     * @return Thymeleaf 模板名 "positions"
+     */
     @GetMapping("/page/positions")
     public String positionsPage(Model model) {
         model.addAttribute("pageTitle", "职位管理");
@@ -157,7 +169,12 @@ public class DashboardController {
         return "positions";
     }
 
-    /** 候选人库页 */
+    /**
+     * 候选人库页
+     *
+     * @param model Spring MVC 模型
+     * @return Thymeleaf 模板名 "candidates"
+     */
     @GetMapping("/page/candidates")
     public String candidatesPage(Model model) {
         model.addAttribute("pageTitle", "候选人库");
@@ -167,7 +184,12 @@ public class DashboardController {
         return "candidates";
     }
 
-    /** 投递记录页 */
+    /**
+     * 投递记录页
+     *
+     * @param model Spring MVC 模型
+     * @return Thymeleaf 模板名 "applications"
+     */
     @GetMapping("/page/applications")
     public String applicationsPage(Model model) {
         model.addAttribute("pageTitle", "投递记录");
@@ -177,7 +199,12 @@ public class DashboardController {
         return "applications";
     }
 
-    /** 筛选规则页 */
+    /**
+     * 筛选规则页
+     *
+     * @param model Spring MVC 模型
+     * @return Thymeleaf 模板名 "rules"
+     */
     @GetMapping("/page/rules")
     public String rulesPage(Model model) {
         model.addAttribute("pageTitle", "筛选规则");
@@ -187,7 +214,12 @@ public class DashboardController {
         return "rules";
     }
 
-    /** 公司管理页 */
+    /**
+     * 公司管理页
+     *
+     * @param model Spring MVC 模型
+     * @return Thymeleaf 模板名 "companies"
+     */
     @GetMapping("/page/companies")
     public String companiesPage(Model model) {
         model.addAttribute("pageTitle", "公司管理");
@@ -197,7 +229,12 @@ public class DashboardController {
         return "companies";
     }
 
-    /** 用户管理页 */
+    /**
+     * 用户管理页
+     *
+     * @param model Spring MVC 模型
+     * @return Thymeleaf 模板名 "users"
+     */
     @GetMapping("/page/users")
     public String usersPage(Model model) {
         model.addAttribute("pageTitle", "用户管理");
@@ -207,7 +244,14 @@ public class DashboardController {
         return "users";
     }
 
-    /** 职位详情页 */
+    /**
+     * 职位详情页
+     * <p>展示职位基本信息及其关联的投递列表（含候选人姓名、状态、最近一次筛选结果）。</p>
+     *
+     * @param id     职位 ID
+     * @param model  Spring MVC 模型
+     * @return Thymeleaf 模板名 "position-detail"
+     */
     @GetMapping("/page/positions/{id}")
     public String positionDetailPage(@PathVariable Long id, Model model) {
         Position position = positionMapper.selectById(id);
@@ -258,7 +302,14 @@ public class DashboardController {
         return "position-detail";
     }
 
-    /** 候选人详情页 */
+    /**
+     * 候选人详情页
+     * <p>展示候选人简历信息及其投递记录（含职位名称、状态、最近一次筛选结果）。</p>
+     *
+     * @param id     候选人 ID
+     * @param model  Spring MVC 模型
+     * @return Thymeleaf 模板名 "candidate-detail"
+     */
     @GetMapping("/page/candidates/{id}")
     public String candidateDetailPage(@PathVariable Long id, Model model) {
         Candidate candidate = candidateMapper.selectById(id);
