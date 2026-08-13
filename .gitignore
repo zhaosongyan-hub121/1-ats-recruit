@@ -47,6 +47,18 @@ out/
 HELP.md
 application-local.yml
 application-local.properties
+application-dev.yml
+
+# ===== Sensitive =====
+*.pem
+*.key
+.env
+.env.local
+
+# ===== Build Output =====
+build/
+dist/
+*.log.*
 
 # ===== OS =====
 .DS_Store

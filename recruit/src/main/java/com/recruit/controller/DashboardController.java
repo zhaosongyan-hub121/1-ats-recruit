@@ -187,6 +187,16 @@ public class DashboardController {
         return "rules";
     }
 
+    /** 公司管理页 */
+    @GetMapping("/page/companies")
+    public String companiesPage(Model model) {
+        model.addAttribute("pageTitle", "公司管理");
+        model.addAttribute("activeMenu", "companies");
+        model.addAttribute("today", java.time.LocalDate.now().toString());
+        model.addAttribute("user", "系统管理员");
+        return "companies";
+    }
+
     /** 用户管理页 */
     @GetMapping("/page/users")
     public String usersPage(Model model) {

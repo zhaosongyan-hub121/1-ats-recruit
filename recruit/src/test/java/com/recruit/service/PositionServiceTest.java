@@ -26,6 +26,10 @@ class PositionServiceTest {
 
     @Mock
     private PositionMapper positionMapper;
+    @Mock
+    private com.recruit.mapper.UserMapper userMapper;
+    @Mock
+    private com.recruit.mapper.CompanyMapper companyMapper;
 
     @InjectMocks
     private PositionService positionService;

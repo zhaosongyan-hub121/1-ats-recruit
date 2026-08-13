@@ -13,6 +13,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * 智能简历筛选引擎服务
+ * <p>
+ * 基于岗位配置的筛选规则，对候选人简历进行多维度智能匹配评分。
+ * 支持三种规则类型：
+ * <ul>
+ *   <li>SKILL - 技能标签匹配（ANY/ALL模式）</li>
+ *   <li>KEYWORD - 简历关键词匹配（ANY/ALL模式）</li>
+ *   <li>EXPERIENCE - 工作经验年限匹配（MIN模式）</li>
+ * </ul>
+ * 评分规则：totalScore * 2 >= maxScore 即判定为通过。
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,6 +37,14 @@ public class ScreeningEngineService {
     private final ScreenResultMapper screenResultMapper;
     private final ObjectMapper objectMapper;
 
+    /**
+     * 对投递记录执行智能筛选
+     *
+     * @param applicationId 投递记录ID
+     * @return 筛选结果（含得分、通过状态、规则匹配详情）
+     * @throws BusinessException 404 投递记录/候选人/岗位不存在
+     * @throws BusinessException 400 岗位暂无筛选规则
+     */
     public ScreenResult screen(Long applicationId) {
         Application app = applicationMapper.selectById(applicationId);
         if (app == null) {
@@ -45,6 +65,13 @@ public class ScreeningEngineService {
         return doScreen(app, candidate, position, rules);
     }
 
+    /**
+     * 直接对候选人进行岗位匹配评估（无需投递记录）
+     *
+     * @param candidateId 候选人ID
+     * @param positionId  岗位ID
+     * @return 筛选结果
+     */
     public ScreenResult screenCandidateDirect(Long candidateId, Long positionId) {
         Candidate candidate = candidateMapper.selectById(candidateId);
         Position position = positionMapper.selectById(positionId);
@@ -64,6 +91,12 @@ public class ScreeningEngineService {
         return doScreen(dummyApp, candidate, position, rules);
     }
 
+    /**
+     * 执行筛选核心逻辑
+     * <p>
+     * 遍历所有规则逐一评估，累加得分，计算通过率。
+     * 通过条件：totalScore * 2 >= maxScore（即至少50%权重匹配）。
+     */
     private ScreenResult doScreen(Application app, Candidate candidate, Position position, List<ScreenRule> rules) {
         List<RuleMatchDetail> details = new ArrayList<>();
         int totalScore = 0;
@@ -103,6 +136,14 @@ public class ScreeningEngineService {
         return result;
     }
 
+    /**
+     * 评估单条规则匹配情况
+     *
+     * @param rule     筛选规则
+     * @param candidate 候选人档案
+     * @param position  岗位信息
+     * @return 规则匹配详情
+     */
     private RuleMatchDetail evaluateRule(ScreenRule rule, Candidate candidate, Position position) {
         RuleMatchDetail detail = new RuleMatchDetail();
         detail.ruleId = rule.getId();
@@ -129,6 +170,11 @@ public class ScreeningEngineService {
         }
     }
 
+    /**
+     * 技能匹配评估
+     * <p>
+     * ANY模式：任一技能匹配即通过；ALL模式：所有技能都需匹配。
+     */
     private RuleMatchDetail evaluateSkillRule(ScreenRule rule, Candidate candidate,
                                                String[] expectedValues, RuleMatchDetail detail) {
         String candidateSkills = candidate.getSkills() != null ? candidate.getSkills().toLowerCase() : "";
@@ -159,6 +205,11 @@ public class ScreeningEngineService {
         return detail;
     }
 
+    /**
+     * 关键词匹配评估
+     * <p>
+     * 在候选人简历文本中搜索指定关键词，支持ANY/ALL匹配模式。
+     */
     private RuleMatchDetail evaluateKeywordRule(ScreenRule rule, Candidate candidate,
                                                 String[] expectedValues, RuleMatchDetail detail) {
         String resumeText = candidate.getResumeText() != null ? candidate.getResumeText().toLowerCase() : "";
@@ -189,6 +240,11 @@ public class ScreeningEngineService {
         return detail;
     }
 
+    /**
+     * 经验年限匹配评估
+     * <p>
+     * 校验候选人工作年限是否达到规则要求的最小值。
+     */
     private RuleMatchDetail evaluateExperienceRule(ScreenRule rule, Candidate candidate,
                                                     String[] expectedValues, RuleMatchDetail detail) {
         int candidateYears = candidate.getExperienceYears() != null ? candidate.getExperienceYears() : 0;
@@ -214,16 +270,30 @@ public class ScreeningEngineService {
         return detail;
     }
 
+    /**
+     * 规则匹配详情（内部DTO）
+     * <p>
+     * 记录每条规则的匹配结果，用于前端展示筛选明细。
+     */
     @Data
     public static class RuleMatchDetail {
+        /** 规则ID */
         private Long ruleId;
+        /** 规则名称 */
         private String ruleName;
+        /** 规则类型 */
         private String ruleType;
+        /** 规则权重 */
         private int weight;
+        /** 实际得分 */
         private int score;
+        /** 是否匹配 */
         private boolean matched;
+        /** 已匹配的值 */
         private List<String> matchedValues;
+        /** 未匹配的值 */
         private List<String> unmatchedValues;
+        /** 匹配原因说明 */
         private String reason;
     }
 }

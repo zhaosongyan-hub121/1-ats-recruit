@@ -10,11 +10,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * JWT 鉴权拦截器
- *
- * 校验 Authorization 头：Bearer {token}
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -32,10 +27,11 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
         try {
             DecodedJWT jwt = jwtUtils.parse(token);
-            UserContext.set(new UserContext.LoginUser(
-                    jwt.getClaim("userId").asLong(),
-                    jwt.getClaim("username").asString(),
-                    jwt.getClaim("role").asString()));
+            Long userId = jwt.getClaim("userId").asLong();
+            String username = jwt.getClaim("username").asString();
+            String role = jwt.getClaim("role").asString();
+            Long companyId = jwt.getClaim("companyId") != null ? jwt.getClaim("companyId").asLong() : null;
+            UserContext.set(new UserContext.LoginUser(userId, username, role, companyId));
             return true;
         } catch (Exception e) {
             log.warn("token 校验失败: {}", e.getMessage());
@@ -43,7 +39,6 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
     }
 
-    /** 从 Authorization 头 或 Cookie 中提取 token */
     public static String extractToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {

@@ -55,7 +55,7 @@ class AuthControllerTest {
         req.setPassword("admin123");
 
         LoginResponse resp = new LoginResponse(
-                "mock-jwt-token", 1L, "admin", "系统管理员", "ADMIN", "a****@***********", null, null, null);
+                "mock-jwt-token", 1L, "admin", "系统管理员", "ADMIN", "a****@***********", null, null, null, null);
 
         when(userService.login(any(LoginRequest.class))).thenReturn(resp);
 

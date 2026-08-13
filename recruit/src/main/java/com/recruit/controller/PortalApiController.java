@@ -70,7 +70,10 @@ public class PortalApiController {
             @RequestParam(required = false) String location,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String company,
-            @RequestParam(required = false) String department) {
+            @RequestParam(required = false) String department,
+            @RequestParam(required = false) String salary,
+            @RequestParam(required = false) String experience,
+            @RequestParam(required = false) String education) {
 
         LambdaQueryWrapper<Position> wrapper = new LambdaQueryWrapper<Position>()
                 .eq(Position::getStatus, "OPEN");
@@ -85,6 +88,26 @@ public class PortalApiController {
                     .or().like(Position::getRequirements, keyword)
                     .or().like(Position::getCompanyName, keyword));
         }
+        if (StringUtils.hasText(salary)) {
+            switch (salary) {
+                case "10K以下":
+                    wrapper.and(w -> w.like(Position::getSalary, "6K").or().like(Position::getSalary, "8K").or().like(Position::getSalary, "10K"));
+                    break;
+                case "10-20K":
+                    wrapper.and(w -> w.like(Position::getSalary, "10K").or().like(Position::getSalary, "12K").or().like(Position::getSalary, "15K").or().like(Position::getSalary, "18K").or().like(Position::getSalary, "20K"));
+                    break;
+                case "20-40K":
+                    wrapper.and(w -> w.like(Position::getSalary, "20K").or().like(Position::getSalary, "25K").or().like(Position::getSalary, "30K").or().like(Position::getSalary, "35K").or().like(Position::getSalary, "40K"));
+                    break;
+                case "40K以上":
+                    wrapper.and(w -> w.like(Position::getSalary, "40K").or().like(Position::getSalary, "45K").or().like(Position::getSalary, "50K").or().like(Position::getSalary, "60K"));
+                    break;
+                default:
+                    wrapper.like(Position::getSalary, salary);
+            }
+        }
+        if (StringUtils.hasText(experience)) wrapper.like(Position::getExperience, experience);
+        if (StringUtils.hasText(education)) wrapper.like(Position::getEducation, education);
         wrapper.orderByDesc(Position::getCreatedAt);
 
         Page<Position> page = positionMapper.selectPage(new Page<>(current, size), wrapper);

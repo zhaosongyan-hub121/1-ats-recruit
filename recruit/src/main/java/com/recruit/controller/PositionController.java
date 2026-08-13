@@ -3,6 +3,7 @@ package com.recruit.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.recruit.common.R;
 import com.recruit.entity.Position;
+import com.recruit.security.UserContext;
 import com.recruit.service.PositionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,11 +20,15 @@ public class PositionController {
     private final PositionService positionService;
 
     @GetMapping
-    @Operation(summary = "分页查询职位", description = "支持关键词模糊搜索（标题/描述/要求），按创建时间倒序")
+    @Operation(summary = "分页查询职位", description = "支持关键词模糊搜索，管理员查看全部，HR仅查看本公司")
     public R<Page<Position>> page(
             @Parameter(description = "页码，从1开始") @RequestParam(defaultValue = "1") long current,
             @Parameter(description = "每页条数") @RequestParam(defaultValue = "10") long size,
-            @Parameter(description = "搜索关键词") @RequestParam(required = false) String keyword) {
+            @Parameter(description = "搜索关键词") @RequestParam(required = false) String keyword,
+            @Parameter(description = "角色过滤") @RequestParam(required = false) String role) {
+        if ("hr".equalsIgnoreCase(role)) {
+            return R.ok(positionService.pageForHr(current, size, keyword));
+        }
         return R.ok(positionService.page(current, size, keyword));
     }
 

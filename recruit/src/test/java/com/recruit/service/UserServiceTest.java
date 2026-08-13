@@ -55,7 +55,7 @@ class UserServiceTest {
         req.setPassword(rawPassword);
 
         when(userMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(user);
-        when(jwtUtils.generate(1L, "admin", "ADMIN")).thenReturn("mock-jwt-token");
+        when(jwtUtils.generate(1L, "admin", "ADMIN", null)).thenReturn("mock-jwt-token");
 
         LoginResponse resp = userService.login(req);
 
@@ -67,7 +67,7 @@ class UserServiceTest {
         assertEquals("ADMIN", resp.getRole());
 
         verify(userMapper, times(1)).selectOne(any(LambdaQueryWrapper.class));
-        verify(jwtUtils, times(1)).generate(1L, "admin", "ADMIN");
+        verify(jwtUtils, times(1)).generate(1L, "admin", "ADMIN", null);
     }
 
     @Test
@@ -82,7 +82,7 @@ class UserServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> userService.login(req));
         assertEquals(401, ex.getCode());
         assertEquals("用户不存在", ex.getMessage());
-        verify(jwtUtils, never()).generate(any(), any(), any());
+        verify(jwtUtils, never()).generate(any(), any(), any(), any());
     }
 
     @Test
@@ -97,7 +97,7 @@ class UserServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> userService.login(req));
         assertEquals(401, ex.getCode());
         assertEquals("密码错误", ex.getMessage());
-        verify(jwtUtils, never()).generate(any(), any(), any());
+        verify(jwtUtils, never()).generate(any(), any(), any(), any());
     }
 
     @Test

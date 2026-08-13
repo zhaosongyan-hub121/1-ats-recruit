@@ -35,6 +35,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/portal/stats",
                         "/api/portal/categories/**",
                         "/api/portal/locations/**",
+                        "/api/companies/**",
+                        "/api/companies/all",
                         // Swagger / OpenAPI
                         "/api-docs/**",
                         "/swagger-ui.html",

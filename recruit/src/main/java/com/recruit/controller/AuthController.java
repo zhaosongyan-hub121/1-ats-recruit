@@ -75,9 +75,11 @@ public class AuthController {
             if (fullUser == null) {
                 return R.ok(null);
             }
-            return R.ok(new LoginResponse(null, fullUser.getId(), fullUser.getUsername(),
+            LoginResponse resp = new LoginResponse(null, fullUser.getId(), fullUser.getUsername(),
                     fullUser.getRealName(), fullUser.getRole(), fullUser.getEmail(), fullUser.getPhone(),
-                    fullUser.getCompany(), fullUser.getAvatar()));
+                    fullUser.getCompany(), fullUser.getAvatar());
+            resp.setCompanyId(fullUser.getCompanyId());
+            return R.ok(resp);
         } catch (Exception e) {
             return R.ok(null);
         }

@@ -9,11 +9,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * 页面路由鉴权拦截器（仅用于 Thymeleaf 页面渲染）
- *
- * 没有有效 token 时 302 重定向到 /login
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -30,10 +25,21 @@ public class PageAuthInterceptor implements HandlerInterceptor {
         }
         try {
             DecodedJWT jwt = jwtUtils.parse(token);
-            UserContext.set(new UserContext.LoginUser(
-                    jwt.getClaim("userId").asLong(),
-                    jwt.getClaim("username").asString(),
-                    jwt.getClaim("role").asString()));
+            Long userId = jwt.getClaim("userId").asLong();
+            String username = jwt.getClaim("username").asString();
+            String role = jwt.getClaim("role").asString();
+            Long companyId = jwt.getClaim("companyId") != null ? jwt.getClaim("companyId").asLong() : null;
+
+            String requestURI = request.getRequestURI();
+
+            if (requestURI.startsWith("/dashboard") || requestURI.startsWith("/page/")) {
+                if ("CANDIDATE".equals(role)) {
+                    response.sendRedirect("/portal/profile?error=admin_only");
+                    return false;
+                }
+            }
+
+            UserContext.set(new UserContext.LoginUser(userId, username, role, companyId));
             return true;
         } catch (Exception e) {
             log.warn("页面访问 token 校验失败: {}", e.getMessage());

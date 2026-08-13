@@ -1,205 +1,429 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>ATS 招聘系统 - 注册</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-                         "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            color: #303133;
-        }
-        .register-card {
-            width: 100%;
-            max-width: 460px;
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(31, 45, 61, 0.2);
-            padding: 36px 36px 28px;
-            animation: cardIn .45s ease;
-        }
-        @keyframes cardIn { from { opacity: 0; transform: translateY(16px);} to { opacity:1; transform:none;} }
-        .logo { text-align: center; margin-bottom: 24px; }
-        .logo h1 { font-size: 26px; color: #303133; }
-        .logo p { color: #909399; margin-top: 6px; font-size: 13px; }
-        .logo .badge {
-            display: inline-block; width: 54px; height: 54px; line-height: 54px;
-            font-size: 26px; background: linear-gradient(135deg, #67c23a, #85ce61);
-            color: #fff; border-radius: 14px; margin-bottom: 10px; box-shadow: 0 8px 20px rgba(103,194,58,.35);
-        }
-        .field { margin-bottom: 16px; }
-        .field label {
-            display: block; font-size: 13px; color: #606266; margin-bottom: 6px; font-weight: 500;
-        }
-        .field input {
-            width: 100%; height: 42px; border: 1px solid #dcdfe6; border-radius: 8px;
-            padding: 0 14px; font-size: 14px; outline: none; transition: all .2s;
-        }
-        .field input:focus { border-color: #67c23a; box-shadow: 0 0 0 3px rgba(103,194,58,.15); }
-        .row { display: flex; gap: 12px; }
-        .row .field { flex: 1; }
-        .submit-btn {
-            width: 100%; height: 44px; border: none; border-radius: 8px; color: #fff;
-            font-size: 15px; font-weight: 600; cursor: pointer;
-            background: linear-gradient(90deg, #67c23a, #85ce61);
-            transition: all .2s;
-            margin-top: 4px;
-        }
-        .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(103,194,58,.35); }
-        .submit-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
-        .error {
-            margin-bottom: 14px; padding: 10px 14px; background: #fef0f0; color: #f56c6c;
-            border-radius: 8px; font-size: 13px; display: none;
-        }
-        .error.show { display: block; }
-        .success {
-            margin-bottom: 14px; padding: 10px 14px; background: #f0f9eb; color: #67c23a;
-            border-radius: 8px; font-size: 13px; display: none;
-        }
-        .success.show { display: block; }
-        .links {
-            text-align: center; margin-top: 18px; font-size: 13px; color: #909399;
-        }
-        .links a { color: #409eff; text-decoration: none; }
-        .links a:hover { text-decoration: underline; }
-        .back-home {
-            display: block; text-align: center; margin-top: 12px; font-size: 12px;
-            color: #909399; text-decoration: none;
-        }
-        .back-home:hover { color: #409eff; }
-        .footer { text-align: center; margin-top: 18px; color: #c0c4cc; font-size: 12px; }
-    </style>
+<meta charset="UTF-8">
+<title>ATS 招聘系统 - 注册</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;min-height:100vh;display:flex;color:#1a1a1a}
+
+.left-panel{flex:1;background:linear-gradient(135deg,#1677ff 0%,#722ed1 100%);display:flex;align-items:center;justify-content:center;padding:60px;position:relative;overflow:hidden}
+.left-panel::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(255,255,255,.12) 0%,transparent 70%);border-radius:50%;top:-250px;right:-200px}
+.left-panel::after{content:'';position:absolute;width:450px;height:450px;background:radial-gradient(circle,rgba(255,255,255,.06) 0%,transparent 70%);border-radius:50%;bottom:-200px;left:-150px}
+.deco{position:absolute;border-radius:50%;background:rgba(255,255,255,.08)}
+.deco-1{width:200px;height:200px;top:12%;right:8%;background:rgba(255,255,255,.1);backdrop-filter:blur(2px)}
+.deco-2{width:120px;height:120px;bottom:25%;right:18%;background:rgba(255,255,255,.07)}
+.deco-3{width:70px;height:70px;top:55%;left:8%;background:rgba(255,255,255,.09)}
+.deco-4{width:40px;height:40px;top:25%;left:15%;background:rgba(255,255,255,.12)}
+
+.brand{position:relative;z-index:2;color:#fff;max-width:420px}
+.brand-logo{display:inline-flex;align-items:center;justify-content:center;width:68px;height:68px;background:rgba(255,255,255,.18);border-radius:18px;font-size:32px;margin-bottom:32px;backdrop-filter:blur(8px)}
+.brand-title{font-size:44px;font-weight:700;margin-bottom:14px;letter-spacing:-1px}
+.brand-sub{font-size:18px;font-weight:300;opacity:.92;margin-bottom:48px;line-height:1.6}
+.features{list-style:none;display:flex;flex-direction:column;gap:18px}
+.feat{display:flex;align-items:center;gap:14px;font-size:15px;opacity:.95}
+.feat-icon{width:38px;height:38px;background:rgba(255,255,255,.18);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
+.right-panel{flex:1;display:flex;align-items:center;justify-content:center;padding:50px 40px;background:#fff;overflow-y:auto}
+.form-wrap{width:100%;max-width:460px}
+.form-header{margin-bottom:32px}
+.form-title{font-size:30px;font-weight:700;color:#1a1a1a;margin-bottom:8px}
+.form-sub{font-size:15px;color:#666}
+
+.field{position:relative;margin-bottom:20px}
+.field input,.field textarea,.field select{width:100%;height:52px;padding:20px 16px 6px;border:1.5px solid #e8e8e8;border-radius:12px;font-size:14px;outline:none;transition:all .2s ease;background:#f8f8f8;font-family:inherit}
+.field textarea{height:auto;padding:24px 16px 6px;min-height:80px;resize:vertical}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:#1677ff;background:#fff;box-shadow:0 0 0 4px rgba(22,119,255,.1)}
+.field label{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:14px;color:#999;pointer-events:none;transition:all .2s ease;background:transparent;padding:0 6px}
+.field textarea+label{top:18%;transform:none}
+.field input:focus+label,.field input:not(:placeholder-shown)+label,
+.field textarea:focus+label,.field textarea:not(:placeholder-shown)+label{top:14px;transform:translateY(0);font-size:11px;color:#1677ff;font-weight:600;letter-spacing:.5px}
+.field input:not(:focus):not(:placeholder-shown)+label,
+.field textarea:not(:focus):not(:placeholder-shown)+label{top:14px;transform:translateY(0);font-size:11px;color:#999;font-weight:normal}
+.field-err{color:#ff4d4f;font-size:12px;margin-top:5px;display:none}
+.field-err.show{display:block}
+.field.has-err input,.field.has-err textarea{border-color:#ff4d4f;background:#fff}
+.field.has-err input:focus,.field.has-err textarea:focus{box-shadow:0 0 0 4px rgba(255,77,79,.1)}
+.field.has-err input+label,.field.has-err input:focus+label,
+.field.has-err textarea+label,.field.has-err textarea:focus+label{color:#ff4d4f}
+
+.row{display:flex;gap:14px}
+.row .field{flex:1}
+
+.pwd-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#999;border-radius:8px;transition:all .2s}
+.pwd-toggle:hover{color:#1677ff;background:#f0f5ff}
+.pwd-toggle svg{width:18px;height:18px}
+
+.err-alert{margin-bottom:18px;padding:12px 16px;background:#fff2f0;border:1px solid #ffccc7;color:#ff4d4f;border-radius:10px;font-size:14px;display:none;align-items:center;gap:8px}
+.err-alert.show{display:flex}
+
+.success-alert{margin-bottom:18px;padding:12px 16px;background:#f6ffed;border:1px solid #b7eb8f;color:#52c41a;border-radius:10px;font-size:14px;display:none;align-items:center;gap:8px}
+.success-alert.show{display:flex}
+
+.submit-btn{width:100%;height:50px;border:none;border-radius:12px;background:linear-gradient(135deg,#1677ff 0%,#0958d9 100%);color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:all .2s ease;box-shadow:0 4px 14px rgba(22,119,255,.3);letter-spacing:2px;margin-top:4px}
+.submit-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(22,119,255,.4)}
+.submit-btn:active:not(:disabled){transform:translateY(0)}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+.form-foot{text-align:center;margin-top:22px;font-size:14px;color:#666}
+.form-foot a{color:#1677ff;text-decoration:none;font-weight:500;margin-left:4px}
+.form-foot a:hover{text-decoration:underline}
+
+.back{display:block;text-align:center;margin-top:10px;font-size:13px;color:#999;text-decoration:none;transition:color .2s}
+.back:hover{color:#1677ff}
+
+.cprt{text-align:center;margin-top:24px;font-size:12px;color:#bbb}
+
+.role-selector{display:flex;gap:12px;margin-bottom:24px}
+.role-option{flex:1;position:relative;cursor:pointer}
+.role-option input{position:absolute;opacity:0;width:0;height:0}
+.role-option .role-card{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border:1.5px solid #e8e8e8;border-radius:12px;background:#f8f8f8;font-size:14px;color:#666;transition:all .2s ease;user-select:none}
+.role-option:hover .role-card{border-color:#91caff}
+.role-option input:checked+.role-card{border-color:#1677ff;background:#e6f4ff;color:#1677ff;font-weight:600;box-shadow:0 0 0 4px rgba(22,119,255,.1)}
+.role-option .role-icon{font-size:18px}
+
+.company-section{display:none;background:#fafafa;border:1.5px dashed #e8e8e8;border-radius:14px;padding:20px 18px 4px;margin-bottom:20px}
+.company-section.show{display:block}
+.company-section-title{font-size:14px;font-weight:600;color:#1677ff;margin-bottom:16px;display:flex;align-items:center;gap:6px}
+
+@media(max-width:900px){
+  .left-panel{display:none}
+  .right-panel{flex:1;padding:40px 24px}
+  .form-wrap{max-width:100%}
+}
+@media(max-width:480px){
+  .form-title{font-size:26px}
+  .row{flex-direction:column;gap:0}
+  .field input{height:48px}
+  .submit-btn{height:46px}
+}
+</style>
 </head>
 <body>
-    <div class="register-card">
-        <div class="logo">
-            <div class="badge">✨</div>
-            <h1>注册账号</h1>
-            <p>注册后可投递职位、管理你的简历</p>
-        </div>
+<div class="left-panel">
+  <div class="deco deco-1"></div>
+  <div class="deco deco-2"></div>
+  <div class="deco deco-3"></div>
+  <div class="deco deco-4"></div>
+  <div class="brand">
+    <div class="brand-logo">🎯</div>
+    <h1 class="brand-title">ATS 招聘</h1>
+    <p class="brand-sub">AI 驱动的智能招聘平台<br>连接人才与机遇，成就无限可能</p>
+    <ul class="features">
+      <li class="feat"><span class="feat-icon">🔍</span><span>智能简历筛选与精准匹配</span></li>
+      <li class="feat"><span class="feat-icon">📊</span><span>数据分析驱动招聘决策</span></li>
+      <li class="feat"><span class="feat-icon">🤝</span><span>高效的候选人全流程管理</span></li>
+    </ul>
+  </div>
+</div>
 
-        <div id="errorBox" class="error"></div>
-        <div id="successBox" class="success"></div>
-
-        <form id="registerForm" autocomplete="off">
-            <div class="field">
-                <label for="username">用户名 <span style="color:#f56c6c">*</span></label>
-                <input id="username" type="text" placeholder="3-20位，用于登录" required minlength="3" maxlength="20">
-            </div>
-            <div class="row">
-                <div class="field">
-                    <label for="password">密码 <span style="color:#f56c6c">*</span></label>
-                    <input id="password" type="password" placeholder="6-32位" required minlength="6" maxlength="32">
-                </div>
-                <div class="field">
-                    <label for="confirmPassword">确认密码 <span style="color:#f56c6c">*</span></label>
-                    <input id="confirmPassword" type="password" placeholder="再次输入密码" required minlength="6">
-                </div>
-            </div>
-            <div class="field">
-                <label for="realName">真实姓名 <span style="color:#f56c6c">*</span></label>
-                <input id="realName" type="text" placeholder="请输入你的真实姓名" required>
-            </div>
-            <div class="row">
-                <div class="field">
-                    <label for="email">邮箱</label>
-                    <input id="email" type="email" placeholder="选填，用于接收面试通知">
-                </div>
-                <div class="field">
-                    <label for="phone">手机号</label>
-                    <input id="phone" type="tel" placeholder="选填，11位手机号" pattern="^1[3-9]\d{9}$">
-                </div>
-            </div>
-            <button type="submit" class="submit-btn" id="submitBtn">注 册</button>
-        </form>
-
-        <div class="links">
-            已有账号？<a href="/login">立即登录</a>
-        </div>
-        <a href="/portal" class="back-home">← 返回职位首页</a>
-
-        <div class="footer">© 2026 ATS · Spring Boot 2.7.18 + JWT + Thymeleaf</div>
+<div class="right-panel">
+  <div class="form-wrap">
+    <div class="form-header">
+      <h2 class="form-title">创建账号 ✨</h2>
+      <p class="form-sub">注册后可投递职位、管理你的简历</p>
     </div>
 
-    <script>
-        const TOKEN_KEY = 'ATS_TOKEN';
-        const USER_KEY  = 'ATS_USER';
+    <div class="err-alert" id="errorBox">
+      <span>⚠️</span>
+      <span id="errorText">注册失败，请重试</span>
+    </div>
 
-        // 获取 redirect 参数
-        const urlParams = new URLSearchParams(location.search);
-        const redirect = urlParams.get('redirect') || '';
+    <div class="success-alert" id="successBox">
+      <span>✅</span>
+      <span id="successText">注册成功！正在跳转...</span>
+    </div>
 
-        // 更新"已有账号？立即登录"链接带上 redirect
-        const loginLink = document.querySelector('.links a[href="/login"]');
-        if (loginLink) {
-            loginLink.href = redirect ? '/login?redirect=' + encodeURIComponent(redirect) : '/login';
-        }
+    <form id="registerForm" autocomplete="off" novalidate>
+      <div class="role-selector">
+        <label class="role-option">
+          <input type="radio" name="role" value="CANDIDATE" checked>
+          <div class="role-card"><span class="role-icon">👤</span>求职者</div>
+        </label>
+        <label class="role-option">
+          <input type="radio" name="role" value="HR">
+          <div class="role-card"><span class="role-icon">🏢</span>企业HR</div>
+        </label>
+      </div>
 
-        // 已登录直接跳转
-        (function () {
-            if (localStorage.getItem(TOKEN_KEY)) {
-                window.location.replace(redirect || '/portal');
-            }
-        })();
+      <div class="field">
+        <input type="text" id="username" placeholder=" " required minlength="3" maxlength="20">
+        <label for="username">用户名（3-20位）</label>
+        <div class="field-err" id="usernameError"></div>
+      </div>
 
-        const form = document.getElementById('registerForm');
-        const errorBox = document.getElementById('errorBox');
-        const successBox = document.getElementById('successBox');
-        const submitBtn = document.getElementById('submitBtn');
+      <div class="row">
+        <div class="field">
+          <input type="password" id="password" placeholder=" " required minlength="6" maxlength="32">
+          <label for="password">密码（6-32位）</label>
+          <button type="button" class="pwd-toggle" id="togglePwd" aria-label="切换密码可见性">
+            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+          </button>
+          <div class="field-err" id="passwordError"></div>
+        </div>
+        <div class="field">
+          <input type="password" id="confirmPassword" placeholder=" " required minlength="6">
+          <label for="confirmPassword">确认密码</label>
+          <div class="field-err" id="confirmPasswordError"></div>
+        </div>
+      </div>
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            errorBox.classList.remove('show');
-            successBox.classList.remove('show');
+      <div class="field">
+        <input type="text" id="realName" placeholder=" " required>
+        <label for="realName">真实姓名</label>
+        <div class="field-err" id="realNameError"></div>
+      </div>
 
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const realName = document.getElementById('realName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const phone = document.getElementById('phone').value.trim();
+      <div class="row">
+        <div class="field">
+          <input type="email" id="email" placeholder=" ">
+          <label for="email">邮箱（选填）</label>
+          <div class="field-err" id="emailError"></div>
+        </div>
+        <div class="field">
+          <input type="tel" id="phone" placeholder=" ">
+          <label for="phone">手机号（选填）</label>
+          <div class="field-err" id="phoneError"></div>
+        </div>
+      </div>
 
-            if (password !== confirmPassword) {
-                errorBox.innerText = '两次密码输入不一致';
-                errorBox.classList.add('show');
-                return;
-            }
+      <div class="company-section" id="companySection">
+        <div class="company-section-title">🏢 企业信息</div>
+        <div class="field">
+          <input type="text" id="companyName" placeholder=" " required>
+          <label for="companyName">公司名称 *</label>
+          <div class="field-err" id="companyNameError"></div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <input type="text" id="industry" placeholder=" ">
+            <label for="industry">行业</label>
+            <div class="field-err" id="industryError"></div>
+          </div>
+          <div class="field">
+            <input type="text" id="companySize" placeholder=" ">
+            <label for="companySize">规模</label>
+            <div class="field-err" id="companySizeError"></div>
+          </div>
+        </div>
+        <div class="field">
+          <textarea id="companyDescription" placeholder=" "></textarea>
+          <label for="companyDescription">简介</label>
+          <div class="field-err" id="companyDescriptionError"></div>
+        </div>
+      </div>
 
-            submitBtn.disabled = true;
-            submitBtn.innerText = '注册中...';
-            try {
-                const resp = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, confirmPassword, realName, email, phone })
-                });
-                const json = await resp.json();
-                if (json.code === 0 && json.data && json.data.token) {
-                    localStorage.setItem(TOKEN_KEY, json.data.token);
-                    localStorage.setItem(USER_KEY, JSON.stringify(json.data));
-                    successBox.innerText = '注册成功！正在跳转...';
-                    successBox.classList.add('show');
-                    setTimeout(() => { window.location.replace(redirect || '/portal'); }, 800);
-                } else {
-                    errorBox.innerText = json.message || '注册失败，请重试';
-                    errorBox.classList.add('show');
-                }
-            } catch (err) {
-                errorBox.innerText = '请求失败：' + (err.message || err);
-                errorBox.classList.add('show');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerText = '注 册';
-            }
-        });
-    </script>
+      <button type="submit" class="submit-btn" id="submitBtn">注 册</button>
+    </form>
+
+    <div class="form-foot">
+      已有账号？<a href="/login" id="loginLink">立即登录</a>
+    </div>
+    <a href="/portal" class="back">← 返回职位首页</a>
+
+    <div class="cprt">© 2026 ATS · 智能招聘系统</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var TOKEN_KEY = 'ATS_TOKEN';
+  var USER_KEY  = 'ATS_USER';
+  var urlParams = new URLSearchParams(location.search);
+  var redirect = urlParams.get('redirect') || '';
+
+  var form = document.getElementById('registerForm');
+  var errorBox = document.getElementById('errorBox');
+  var errorText = document.getElementById('errorText');
+  var successBox = document.getElementById('successBox');
+  var successText = document.getElementById('successText');
+  var submitBtn = document.getElementById('submitBtn');
+  var loginLink = document.getElementById('loginLink');
+  var roleRadios = document.getElementsByName('role');
+  var companySection = document.getElementById('companySection');
+
+  loginLink.href = redirect ? '/login?redirect=' + encodeURIComponent(redirect) : '/login';
+
+  if(localStorage.getItem(TOKEN_KEY)){
+    window.location.replace(redirect || '/portal');
+    return;
+  }
+
+  var pwdInput = document.getElementById('password');
+  var togglePwd = document.getElementById('togglePwd');
+  var eyeIcon = document.getElementById('eyeIcon');
+  var eyeOpen = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  var eyeClose = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  eyeIcon.innerHTML = eyeOpen;
+
+  togglePwd.addEventListener('click', function(){
+    if(pwdInput.type === 'password'){
+      pwdInput.type = 'text';
+      eyeIcon.innerHTML = eyeClose;
+    } else {
+      pwdInput.type = 'password';
+      eyeIcon.innerHTML = eyeOpen;
+    }
+  });
+
+  function showFieldErr(id, msg){
+    var field = document.getElementById(id).closest('.field');
+    var el = document.getElementById(id + 'Error');
+    if(msg){
+      field.classList.add('has-err');
+      el.textContent = msg;
+      el.classList.add('show');
+    } else {
+      field.classList.remove('has-err');
+      el.classList.remove('show');
+    }
+  }
+
+  function getSelectedRole(){
+    for(var i = 0; i < roleRadios.length; i++){
+      if(roleRadios[i].checked) return roleRadios[i].value;
+    }
+    return 'CANDIDATE';
+  }
+
+  function updateCompanySection(){
+    if(getSelectedRole() === 'HR'){
+      companySection.classList.add('show');
+    } else {
+      companySection.classList.remove('show');
+      showFieldErr('companyName','');
+      showFieldErr('industry','');
+      showFieldErr('companySize','');
+      showFieldErr('companyDescription','');
+    }
+  }
+
+  for(var i = 0; i < roleRadios.length; i++){
+    roleRadios[i].addEventListener('change', updateCompanySection);
+  }
+
+  function validateUsername(){
+    var v = document.getElementById('username').value.trim();
+    if(!v){ showFieldErr('username','请输入用户名'); return false; }
+    if(v.length < 3){ showFieldErr('username','用户名至少3个字符'); return false; }
+    if(v.length > 20){ showFieldErr('username','用户名不超过20个字符'); return false; }
+    showFieldErr('username',''); return true;
+  }
+  function validatePassword(){
+    var v = document.getElementById('password').value;
+    if(!v){ showFieldErr('password','请输入密码'); return false; }
+    if(v.length < 6){ showFieldErr('password','密码至少6位'); return false; }
+    showFieldErr('password',''); return true;
+  }
+  function validateConfirm(){
+    var v = document.getElementById('confirmPassword').value;
+    var p = document.getElementById('password').value;
+    if(!v){ showFieldErr('confirmPassword','请再次输入密码'); return false; }
+    if(v !== p){ showFieldErr('confirmPassword','两次密码不一致'); return false; }
+    showFieldErr('confirmPassword',''); return true;
+  }
+  function validateRealName(){
+    var v = document.getElementById('realName').value.trim();
+    if(!v){ showFieldErr('realName','请输入真实姓名'); return false; }
+    showFieldErr('realName',''); return true;
+  }
+  function validateEmail(){
+    var v = document.getElementById('email').value.trim();
+    if(v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){
+      showFieldErr('email','邮箱格式不正确'); return false;
+    }
+    showFieldErr('email',''); return true;
+  }
+  function validatePhone(){
+    var v = document.getElementById('phone').value.trim();
+    if(v && !/^1[3-9]\d{9}$/.test(v)){
+      showFieldErr('phone','手机号格式不正确'); return false;
+    }
+    showFieldErr('phone',''); return true;
+  }
+  function validateCompanyName(){
+    var v = document.getElementById('companyName').value.trim();
+    if(!v){ showFieldErr('companyName','请输入公司名称'); return false; }
+    showFieldErr('companyName',''); return true;
+  }
+
+  document.getElementById('username').addEventListener('blur', validateUsername);
+  document.getElementById('password').addEventListener('blur', validatePassword);
+  document.getElementById('confirmPassword').addEventListener('blur', validateConfirm);
+  document.getElementById('realName').addEventListener('blur', validateRealName);
+  document.getElementById('email').addEventListener('blur', validateEmail);
+  document.getElementById('phone').addEventListener('blur', validatePhone);
+  document.getElementById('companyName').addEventListener('blur', validateCompanyName);
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    errorBox.classList.remove('show');
+    successBox.classList.remove('show');
+
+    var ok = true;
+    if(!validateUsername()) ok = false;
+    if(!validatePassword()) ok = false;
+    if(!validateConfirm()) ok = false;
+    if(!validateRealName()) ok = false;
+    if(!validateEmail()) ok = false;
+    if(!validatePhone()) ok = false;
+
+    var role = getSelectedRole();
+    var data = {
+      username: document.getElementById('username').value.trim(),
+      password: document.getElementById('password').value,
+      confirmPassword: document.getElementById('confirmPassword').value,
+      realName: document.getElementById('realName').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      role: role
+    };
+
+    if(role === 'HR'){
+      if(!validateCompanyName()) ok = false;
+      data.companyName = document.getElementById('companyName').value.trim();
+      data.industry = document.getElementById('industry').value.trim();
+      data.companySize = document.getElementById('companySize').value.trim();
+      data.companyDescription = document.getElementById('companyDescription').value.trim();
+    }
+
+    if(!ok) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '注册中...';
+
+    fetch('/api/auth/register',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(data)
+    })
+    .then(function(resp){ return resp.json(); })
+    .then(function(json){
+      if(json.code === 0 && json.data && json.data.token){
+        localStorage.setItem(TOKEN_KEY, json.data.token);
+        localStorage.setItem(USER_KEY, JSON.stringify(json.data));
+        successText.textContent = '注册成功！正在跳转...';
+        successBox.classList.add('show');
+        setTimeout(function(){
+          var target = redirect || (role === 'HR' ? '/dashboard' : '/portal');
+          window.location.replace(target);
+        }, 800);
+      } else {
+        errorText.textContent = json.message || '注册失败，请重试';
+        errorBox.classList.add('show');
+      }
+    })
+    .catch(function(err){
+      errorText.textContent = '请求失败：' + (err.message || err);
+      errorBox.classList.add('show');
+    })
+    .then(function(){
+      submitBtn.disabled = false;
+      submitBtn.textContent = '注 册';
+    });
+  });
+})();
+</script>
 </body>
 </html>

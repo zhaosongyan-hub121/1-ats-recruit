@@ -1,10 +1,5 @@
 package com.recruit.security;
 
-/**
- * 当前登录用户上下文（ThreadLocal）
- *
- * 拦截器校验通过后写入；请求结束在 finally 中清理。
- */
 public class UserContext {
 
     private static final ThreadLocal<LoginUser> HOLDER = new ThreadLocal<>();
@@ -21,16 +16,21 @@ public class UserContext {
         HOLDER.remove();
     }
 
-    /** 当前登录用户简要信息 */
     public static class LoginUser {
         private final Long userId;
         private final String username;
         private final String role;
+        private final Long companyId;
 
         public LoginUser(Long userId, String username, String role) {
+            this(userId, username, role, null);
+        }
+
+        public LoginUser(Long userId, String username, String role, Long companyId) {
             this.userId = userId;
             this.username = username;
             this.role = role;
+            this.companyId = companyId;
         }
 
         public Long getUserId() {
@@ -43,6 +43,22 @@ public class UserContext {
 
         public String getRole() {
             return role;
+        }
+
+        public Long getCompanyId() {
+            return companyId;
+        }
+
+        public boolean isAdmin() {
+            return "ADMIN".equals(role);
+        }
+
+        public boolean isHr() {
+            return "HR".equals(role);
+        }
+
+        public boolean isCandidate() {
+            return "CANDIDATE".equals(role);
         }
     }
 }

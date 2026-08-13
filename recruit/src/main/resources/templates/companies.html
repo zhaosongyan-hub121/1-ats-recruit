@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公司管理 - ATS 招聘系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #303133; min-height: 100vh; display: flex; }
+        .sidebar { width: 220px; background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%); color: #fff; padding: 24px 0; flex-shrink: 0; min-height: 100vh; position: sticky; top: 0; overflow-y: auto; }
+        .sidebar .logo { padding: 0 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.12); margin-bottom: 16px; }
+        .sidebar .logo h1 { font-size: 18px; font-weight: 600; letter-spacing: 1px; }
+        .sidebar .logo p { font-size: 12px; opacity: 0.65; margin-top: 4px; }
+        .menu-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.25s ease; font-size: 14px; text-decoration: none; color: rgba(255,255,255,0.8); border-left: 3px solid transparent; }
+        .menu-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .menu-item.active { background: rgba(255,255,255,0.12); border-left: 3px solid #67c23a; color: #fff; font-weight: 500; }
+        .menu-icon { width: 18px; text-align: center; font-size: 16px; }
+        .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .header { background: #fff; height: 60px; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,21,41,0.06); position: sticky; top: 0; z-index: 10; }
+        .header .breadcrumb { color: #606266; font-size: 14px; }
+        .header .breadcrumb strong { color: #303133; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .header-right .date { color: #909399; font-size: 13px; }
+        .user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: #ecf5ff; border-radius: 20px; font-size: 13px; color: #409eff; }
+        .logout-btn { border: 1px solid #fbc4c4; background: #fef0f0; color: #f56c6c; padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all .2s; }
+        .logout-btn:hover { background: #f56c6c; color: #fff; border-color: #f56c6c; }
+        .avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #409eff, #667eea); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        .content { padding: 24px 32px; flex: 1; }
+        .page-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; color: #303133; }
+        .page-title span { font-size: 13px; color: #909399; font-weight: normal; margin-left: 8px; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+        .search-box { display: flex; gap: 8px; flex: 1; max-width: 500px; }
+        .search-input { padding: 8px 14px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 14px; width: 100%; outline: none; transition: border-color 0.2s; }
+        .search-input:focus { border-color: #409eff; }
+        .btn { padding: 8px 20px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; transition: opacity 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: #409eff; color: #fff; }
+        .btn-success { background: #67c23a; color: #fff; }
+        .btn-danger { background: #f56c6c; color: #fff; }
+        .btn-warning { background: #e6a23c; color: #fff; }
+        .btn-default { background: #f4f4f5; color: #606266; }
+        .btn-sm { padding: 4px 12px; font-size: 12px; }
+        .table-wrap { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid rgba(0,0,0,0.03); }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { background: #fafbfc; padding: 14px 24px; text-align: left; font-size: 13px; color: #909399; font-weight: 500; border-bottom: 1px solid #ebeef5; }
+        tbody td { padding: 14px 24px; font-size: 14px; color: #606266; border-bottom: 1px solid #f2f6fc; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f8fafb; }
+        .empty { padding: 40px; text-align: center; color: #c0c4cc; font-size: 13px; }
+        .company-logo { width: 40px; height: 40px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 16px; flex-shrink: 0; }
+        .company-name-cell { display: flex; align-items: center; gap: 12px; }
+        .company-name-text { color: #303133; font-weight: 500; }
+        .company-sub { font-size: 12px; color: #909399; margin-top: 2px; }
+        .tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #f4f4f5; color: #909399; }
+        .tag-industry { background: #ecf5ff; color: #409eff; }
+        .tag-size { background: #f0f9eb; color: #67c23a; }
+        .actions { display: flex; gap: 8px; }
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 16px; background: #fff; border-top: 1px solid #ebeef5; }
+        .pagination .page-info { color: #909399; font-size: 13px; margin-right: 12px; }
+        .pagination button { min-width: 32px; height: 32px; padding: 0 10px; border: 1px solid #dcdfe6; background: #fff; color: #606266; border-radius: 4px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+        .pagination button:hover:not(:disabled) { color: #409eff; border-color: #409eff; }
+        .pagination button.active { background: #409eff; color: #fff; border-color: #409eff; }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #fff; border-radius: 10px; padding: 32px; width: 560px; max-width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+        .modal h2 { font-size: 18px; margin-bottom: 24px; color: #303133; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; color: #606266; margin-bottom: 6px; font-weight: 500; }
+        .form-group label .required { color: #f56c6c; margin-left: 2px; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px 12px; border: 1px solid #dcdfe6; border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s; font-family: inherit; }
+        .form-group input:focus, .form-group textarea:focus { border-color: #409eff; }
+        .form-group .hint { font-size: 12px; color: #909399; margin-top: 4px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid #f2f6fc; }
+        .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 6px; color: #fff; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .toast.show { opacity: 1; }
+        .toast-success { background: #67c23a; }
+        .toast-error { background: #f56c6c; }
+        .toast-info { background: #409eff; }
+        .footer { text-align: center; padding: 16px; color: #909399; font-size: 12px; background: #fff; border-top: 1px solid #ebeef5; }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .content { padding: 16px; }
+            .header { padding: 0 16px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .search-box { max-width: none; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo">
+            <h1>🎯 ATS 招聘系统</h1>
+            <p>Applicant Tracking System</p>
+        </div>
+        <a class="menu-item" href="/dashboard">
+            <span class="menu-icon">📊</span>
+            <span>数据看板</span>
+        </a>
+        <a class="menu-item" href="/page/positions">
+            <span class="menu-icon">💼</span>
+            <span>职位管理</span>
+        </a>
+        <a class="menu-item" href="/page/candidates">
+            <span class="menu-icon">👥</span>
+            <span>候选人库</span>
+        </a>
+        <a class="menu-item" href="/page/applications">
+            <span class="menu-icon">📨</span>
+            <span>投递记录</span>
+        </a>
+        <a class="menu-item" href="/page/rules">
+            <span class="menu-icon">⚙️</span>
+            <span>筛选规则</span>
+        </a>
+        <a class="menu-item active" href="/page/companies">
+            <span class="menu-icon">🏢</span>
+            <span>公司管理</span>
+        </a>
+        <a class="menu-item" href="/page/users">
+            <span class="menu-icon">👤</span>
+            <span>用户管理</span>
+        </a>
+        <a class="menu-item" href="/swagger-ui.html" target="_blank">
+            <span class="menu-icon">🧪</span>
+            <span>API 文档</span>
+        </a>
+    </aside>
+
+    <div class="main">
+        <header class="header">
+            <div class="breadcrumb">
+                🏠 首页 / <strong>公司管理</strong>
+            </div>
+            <div class="header-right">
+                <span class="date">📅 <span th:text="${today}">2026-08-12</span></span>
+                <div class="user-chip" title="当前用户">
+                    <div class="avatar">管</div>
+                    <span th:text="${user}">系统管理员</span>
+                </div>
+                <button type="button" class="logout-btn" id="logoutBtn" title="退出登录">🚪 退出</button>
+            </div>
+        </header>
+
+        <main class="content">
+            <div class="page-title">
+                公司管理 <span>管理企业信息与招聘主体</span>
+            </div>
+
+            <div class="toolbar">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="keyword" placeholder="搜索公司名称或行业..." onkeyup="if(event.key==='Enter') doSearch()">
+                    <button class="btn btn-primary" onclick="doSearch()">🔍 搜索</button>
+                </div>
+                <button class="btn btn-success" onclick="openCreateModal()">➕ 新增公司</button>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="width:60px;">Logo</th>
+                        <th>公司名称</th>
+                        <th>行业</th>
+                        <th>所在地</th>
+                        <th>网站</th>
+                        <th>规模</th>
+                        <th style="width:180px;">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="dataBody">
+                        <tr><td colspan="7" class="empty">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+        </main>
+
+        <footer class="footer">
+            © 2026 ATS 招聘管理系统 · Powered by Spring Boot 2.7.18 + MyBatis-Plus + Thymeleaf
+        </footer>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2 id="modalTitle">新增公司</h2>
+            <input type="hidden" id="editId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>公司名称 <span class="required">*</span></label>
+                    <input type="text" id="f_name" placeholder="请输入公司名称">
+                </div>
+                <div class="form-group">
+                    <label>Logo 文字</label>
+                    <input type="text" id="f_logo" placeholder="Logo 显示文字，如：腾" maxlength="4">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Logo 颜色</label>
+                    <input type="color" id="f_logoColor" value="#409eff" style="height:36px;padding:4px;">
+                </div>
+                <div class="form-group">
+                    <label>公司规模</label>
+                    <select id="f_size">
+                        <option value="1">少于 20 人</option>
+                        <option value="20">20-99 人</option>
+                        <option value="100">100-499 人</option>
+                        <option value="500">500-999 人</option>
+                        <option value="1000">1000-9999 人</option>
+                        <option value="10000">10000+ 人</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>所属行业</label>
+                    <input type="text" id="f_industry" placeholder="如：互联网/游戏">
+                </div>
+                <div class="form-group">
+                    <label>所在城市</label>
+                    <input type="text" id="f_location" placeholder="如：深圳">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>官方网站</label>
+                <input type="text" id="f_website" placeholder="如：tencent.com">
+            </div>
+            <div class="form-group">
+                <label>公司介绍</label>
+                <textarea id="f_description" rows="3" placeholder="公司简介..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-default" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveCompany()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="/ats-common.js"></script>
+    <script>
+        const API = '/api/companies';
+        let currentPage = 1;
+        let pageSize = 10;
+        let totalPages = 1;
+
+        function showToast(msg, type) {
+            var toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast show toast-' + (type || 'info');
+            setTimeout(function () { toast.className = 'toast'; }, 2500);
+        }
+
+        function sizeText(size) {
+            if (!size && size !== 0) return '-';
+            if (size >= 10000) return '10000+ 人';
+            if (size >= 1000) return size + '+ 人';
+            return size + ' 人';
+        }
+
+        function escapeHtml(s) {
+            return ATS.escapeHtml(s);
+        }
+
+        async function loadData(keyword) {
+            var url = API + '?current=' + currentPage + '&size=' + pageSize;
+            if (keyword) url += '&keyword=' + encodeURIComponent(keyword);
+            try {
+                var json = await ATS.ajax(url);
+                if (json.code !== 0) { showToast(json.message || '加载失败', 'error'); return; }
+                var data = json.data;
+                renderTable(data.records || []);
+                renderPagination(data.total || 0);
+            } catch (e) {
+                document.getElementById('dataBody').innerHTML = '<tr><td colspan="7" class="empty">加载失败</td></tr>';
+                document.getElementById('pagination').innerHTML = '';
+            }
+        }
+
+        function renderTable(list) {
+            var tbody = document.getElementById('dataBody');
+            if (!list || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty">暂无公司数据</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(function (c) {
+                var logoStyle = 'background:' + (c.logoColor || '#409eff');
+                var logoText = escapeHtml(c.logo || (c.name ? c.name.charAt(0) : '?'));
+                var nameHtml = '<div class="company-name-cell">' +
+                    '<div class="company-logo" style="' + logoStyle + '">' + logoText + '</div>' +
+                    '<div><div class="company-name-text">' + escapeHtml(c.name) + '</div>' +
+                    (c.description ? '<div class="company-sub">' + escapeHtml(c.description.length > 50 ? c.description.substring(0, 50) + '...' : c.description) + '</div>' : '') +
+                    '</div></div>';
+                return '<tr>' +
+                    '<td></td>' +
+                    '<td>' + nameHtml + '</td>' +
+                    '<td>' + (c.industry ? '<span class="tag tag-industry">' + escapeHtml(c.industry) + '</span>' : '-') + '</td>' +
+                    '<td>' + escapeHtml(c.location || '-') + '</td>' +
+                    '<td>' + (c.website ? '<a href="https://' + escapeHtml(c.website) + '" target="_blank" style="color:#409eff;text-decoration:none;">' + escapeHtml(c.website) + '</a>' : '-') + '</td>' +
+                    '<td>' + (c.size ? '<span class="tag tag-size">' + sizeText(c.size) + '</span>' : '-') + '</td>' +
+                    '<td><div class="actions">' +
+                    '<button class="btn btn-warning btn-sm" onclick="openEditModal(' + c.id + ')">编辑</button>' +
+                    '<button class="btn btn-danger btn-sm" onclick="deleteCompany(' + c.id + ')">删除</button>' +
+                    '</div></td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function renderPagination(total) {
+            totalPages = Math.max(1, Math.ceil(total / pageSize));
+            var container = document.getElementById('pagination');
+            var info = '<span class="page-info">共 ' + total + ' 条 / 第 ' + currentPage + ' / ' + totalPages + ' 页</span>';
+            var html = info;
+            html += '<button ' + (currentPage <= 1 ? 'disabled' : '') + ' onclick="goPage(' + (currentPage - 1) + ')">上一页</button>';
+
+            var start = Math.max(1, currentPage - 2);
+            var end = Math.min(totalPages, start + 4);
+            if (end - start < 4) start = Math.max(1, end - 4);
+
+            for (var i = start; i <= end; i++) {
+                html += '<button class="' + (i === currentPage ? 'active' : '') + '" onclick="goPage(' + i + ')">' + i + '</button>';
+            }
+
+            html += '<button ' + (currentPage >= totalPages ? 'disabled' : '') + ' onclick="goPage(' + (currentPage + 1) + ')">下一页</button>';
+            container.innerHTML = html;
+        }
+
+        function goPage(p) {
+            currentPage = p;
+            loadData(document.getElementById('keyword').value);
+        }
+
+        function doSearch() {
+            currentPage = 1;
+            loadData(document.getElementById('keyword').value);
+        }
+
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = '新增公司';
+            document.getElementById('editId').value = '';
+            ['f_name', 'f_logo', 'f_industry', 'f_location', 'f_website', 'f_description'].forEach(function (id) { document.getElementById(id).value = ''; });
+            document.getElementById('f_logoColor').value = '#409eff';
+            document.getElementById('f_size').value = '100';
+            document.getElementById('modalOverlay').classList.add('show');
+        }
+
+        async function openEditModal(id) {
+            try {
+                var json = await ATS.ajax(API + '/' + id);
+                if (json.code !== 0) { showToast('获取详情失败', 'error'); return; }
+                var c = json.data;
+                document.getElementById('modalTitle').textContent = '编辑公司';
+                document.getElementById('editId').value = c.id;
+                document.getElementById('f_name').value = c.name || '';
+                document.getElementById('f_logo').value = c.logo || '';
+                document.getElementById('f_logoColor').value = c.logoColor || '#409eff';
+                document.getElementById('f_industry').value = c.industry || '';
+                document.getElementById('f_location').value = c.location || '';
+                document.getElementById('f_website').value = c.website || '';
+                document.getElementById('f_description').value = c.description || '';
+                document.getElementById('f_size').value = c.size || 100;
+                document.getElementById('modalOverlay').classList.add('show');
+            } catch (e) { showToast('获取详情失败', 'error'); }
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('show');
+        }
+
+        async function saveCompany() {
+            var id = document.getElementById('editId').value;
+            var name = document.getElementById('f_name').value;
+            if (!name) { showToast('请填写公司名称', 'error'); return; }
+
+            var body = {
+                name: name,
+                logo: document.getElementById('f_logo').value,
+                logoColor: document.getElementById('f_logoColor').value,
+                industry: document.getElementById('f_industry').value,
+                location: document.getElementById('f_location').value,
+                website: document.getElementById('f_website').value,
+                description: document.getElementById('f_description').value,
+                size: parseInt(document.getElementById('f_size').value, 10)
+            };
+
+            try {
+                var json;
+                if (id) {
+                    json = await ATS.ajax(API + '/' + id, { method: 'PUT', body: body });
+                } else {
+                    json = await ATS.ajax(API, { method: 'POST', body: body });
+                }
+                if (json.code !== 0) { showToast(json.message || '保存失败', 'error'); return; }
+                closeModal();
+                showToast(id ? '更新成功' : '新增成功', 'success');
+                loadData(document.getElementById('keyword').value);
+            } catch (e) { showToast('保存失败: ' + e.message, 'error'); }
+        }
+
+        async function deleteCompany(id) {
+            if (!confirm('确认删除该公司？删除后不可恢复。')) return;
+            try {
+                var json = await ATS.ajax(API + '/' + id, { method: 'DELETE' });
+                if (json.code === 0) {
+                    showToast('删除成功', 'success');
+                    if (document.querySelectorAll('#dataBody tr').length <= 1 && currentPage > 1) {
+                        currentPage--;
+                    }
+                    loadData(document.getElementById('keyword').value);
+                } else {
+                    showToast(json.message || '删除失败', 'error');
+                }
+            } catch (e) { showToast('删除失败: ' + e.message, 'error'); }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var btn = document.getElementById('logoutBtn');
+            if (btn) btn.addEventListener('click', function () { ATS.logout(); });
+        });
+
+        loadData();
+    </script>
+</body>
+</html>

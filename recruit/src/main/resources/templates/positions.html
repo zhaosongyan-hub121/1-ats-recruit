@@ -70,6 +70,7 @@
         <a class="menu-item" href="/page/candidates"><span class="menu-icon">👥</span><span>候选人库</span></a>
         <a class="menu-item" href="/page/applications"><span class="menu-icon">📨</span><span>投递记录</span></a>
         <a class="menu-item" href="/page/rules"><span class="menu-icon">⚙️</span><span>筛选规则</span></a>
+        <a class="menu-item" th:classappend="${activeMenu == 'companies'} ? 'active'" href="/page/companies"><span class="menu-icon">🏢</span><span>公司管理</span></a>
         <a class="menu-item" th:classappend="${activeMenu == 'users'} ? 'active'" href="/page/users"><span class="menu-icon">👤</span><span>用户管理</span></a>
         <a class="menu-item" href="/swagger-ui.html" target="_blank"><span class="menu-icon">🧪</span><span>API 文档</span></a>
     </aside>

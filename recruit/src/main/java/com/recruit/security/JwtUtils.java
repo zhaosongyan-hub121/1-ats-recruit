@@ -27,6 +27,22 @@ public class JwtUtils {
 
     /** 生成 token */
     public String generate(Long userId, String username, String role) {
+        return generate(userId, username, role, null);
+    }
+
+    /** 生成 token（含 companyId） */
+    public String generate(Long userId, String username, String role, Long companyId) {
+        if (companyId != null) {
+            return JWT.create()
+                    .withSubject("recruit")
+                    .withClaim("userId", userId)
+                    .withClaim("username", username)
+                    .withClaim("role", role)
+                    .withClaim("companyId", companyId)
+                    .withIssuedAt(new Date())
+                    .withExpiresAt(new Date(System.currentTimeMillis() + expireMillis))
+                    .sign(Algorithm.HMAC256(secret));
+        }
         return JWT.create()
                 .withSubject("recruit")
                 .withClaim("userId", userId)

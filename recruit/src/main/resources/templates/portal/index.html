@@ -3,279 +3,587 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATS 招聘 - 找工作，从此简单</title>
+    <title>ATS 招聘 - 找到心仪工作，开启职业新篇章</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #1677ff;
+            --primary-hover: #4096ff;
+            --primary-light: #e6f4ff;
+            --primary-gradient: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
+            --text-primary: #1f2329;
+            --text-secondary: #4e5969;
+            --text-tertiary: #86909c;
+            --text-placeholder: #c9cdd4;
+            --border: #e5e6eb;
+            --border-light: #f2f3f5;
+            --bg-page: #f7f8fa;
+            --bg-card: #ffffff;
+            --bg-hover: #f2f3f5;
+            --success: #00b42a;
+            --warning: #ff7d00;
+            --danger: #f53f3f;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+            --shadow-card: 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.1);
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-                         "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            background: #f5f7fa;
-            color: #303133;
+                         "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+            background: var(--bg-page);
+            color: var(--text-primary);
             min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
         a { color: inherit; text-decoration: none; }
-        button { font-family: inherit; cursor: pointer; }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+        input, select { font-family: inherit; }
 
-        /* ===== 顶部导航 ===== */
+        /* ===== Top Navigation ===== */
         .top-nav {
             background: #fff;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            border-bottom: 1px solid var(--border-light);
             position: sticky; top: 0; z-index: 100;
+            backdrop-filter: saturate(180%) blur(12px);
         }
-        .top-nav-inner {
-            max-width: 1280px; margin: 0 auto; padding: 0 24px; height: 60px;
-            display: flex; align-items: center; gap: 24px;
+        .nav-inner {
+            max-width: 1280px; margin: 0 auto; padding: 0 24px; height: 64px;
+            display: flex; align-items: center; gap: 32px;
         }
         .brand {
-            font-size: 22px; font-weight: 700;
-            background: linear-gradient(90deg, #67c23a, #409eff);
+            font-size: 20px; font-weight: 700;
+            background: var(--primary-gradient);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            display: flex; align-items: center; gap: 6px; white-space: nowrap;
+            display: flex; align-items: center; gap: 8px; white-space: nowrap;
+            letter-spacing: -0.5px;
         }
-        .brand::before { content: "🎯"; font-size: 24px; -webkit-text-fill-color: initial; }
+        .brand-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: var(--primary-gradient);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 700;
+            -webkit-text-fill-color: initial;
+            box-shadow: 0 2px 8px rgba(22,119,255,0.3);
+        }
+        .nav-links { display: flex; align-items: center; gap: 4px; }
+        .nav-link {
+            font-size: 14px; color: var(--text-secondary);
+            padding: 8px 16px; border-radius: var(--radius-sm);
+            transition: all .2s ease; font-weight: 500; white-space: nowrap;
+            position: relative;
+        }
+        .nav-link:hover { color: var(--primary); background: var(--primary-light); }
+        .nav-link.active { color: var(--primary); font-weight: 600; }
+        .nav-link.active::after {
+            content: ""; position: absolute; bottom: -20px; left: 50%;
+            transform: translateX(-50%); width: 24px; height: 3px;
+            background: var(--primary); border-radius: 2px;
+        }
+
         .search-box {
-            flex: 1; max-width: 520px; display: flex; height: 38px;
-            border: 1px solid #dcdfe6; border-radius: 20px; overflow: hidden;
-            transition: border-color .2s;
+            flex: 1; max-width: 480px; display: flex; height: 40px;
+            border: 1px solid var(--border); border-radius: 20px; overflow: hidden;
+            transition: all .2s ease; background: #fff;
         }
-        .search-box:focus-within { border-color: #67c23a; }
+        .search-box:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(22,119,255,0.1);
+        }
         .search-box input {
-            flex: 1; border: none; outline: none; padding: 0 18px; font-size: 14px; background: transparent;
+            flex: 1; border: none; outline: none; padding: 0 20px;
+            font-size: 14px; background: transparent; color: var(--text-primary);
         }
+        .search-box input::placeholder { color: var(--text-placeholder); }
         .search-box button {
-            width: 64px; border: none;
-            background: linear-gradient(90deg, #67c23a, #85ce61);
-            color: #fff; font-size: 14px; cursor: pointer; transition: opacity .2s;
+            width: 72px; border: none;
+            background: var(--primary-gradient);
+            color: #fff; font-size: 14px; cursor: pointer;
+            transition: opacity .2s ease; font-weight: 500;
         }
         .search-box button:hover { opacity: .9; }
-        .nav-links { display: flex; align-items: center; gap: 4px; }
-        .nav-links a {
-            font-size: 14px; color: #606266; padding: 6px 14px;
-            border-radius: 6px; transition: all .2s; white-space: nowrap;
+
+        .nav-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+        .btn-nav {
+            font-size: 14px; color: var(--text-secondary);
+            padding: 7px 16px; border-radius: var(--radius-sm);
+            transition: all .2s ease; font-weight: 500; white-space: nowrap;
         }
-        .nav-links a:hover { color: #409eff; background: #ecf5ff; }
-        .nav-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
-        .admin-entry { font-size: 13px; color: #909399; padding: 6px 12px; border-radius: 6px; transition: all .2s; white-space: nowrap; }
-        .admin-entry:hover { color: #409eff; background: #ecf5ff; }
-        .btn-login { font-size: 14px; color: #606266; padding: 6px 16px; border: 1px solid #dcdfe6; border-radius: 6px; transition: all .2s; }
-        .btn-login:hover { border-color: #409eff; color: #409eff; }
-        .btn-register { font-size: 14px; color: #fff; padding: 7px 18px; border-radius: 6px; background: linear-gradient(90deg, #67c23a, #85ce61); transition: all .2s; white-space: nowrap; }
-        .btn-register:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(103,194,58,.3); }
+        .btn-nav:hover { color: var(--primary); }
+        .btn-login {
+            border: 1px solid var(--border);
+        }
+        .btn-login:hover {
+            border-color: var(--primary); color: var(--primary);
+            background: var(--primary-light);
+        }
+        .btn-register {
+            color: #fff;
+            background: var(--primary-gradient);
+            padding: 8px 20px; border-radius: var(--radius-sm);
+            transition: all .2s ease;
+            box-shadow: 0 2px 6px rgba(22,119,255,0.25);
+        }
+        .btn-register:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(22,119,255,0.35);
+        }
+        .btn-enterprise {
+            font-size: 13px; color: var(--text-tertiary);
+            padding: 6px 12px; border-radius: var(--radius-sm);
+            transition: all .2s ease; white-space: nowrap;
+        }
+        .btn-enterprise:hover { color: var(--primary); background: var(--primary-light); }
+
         .user-menu {
             display: flex; align-items: center; gap: 10px;
-            font-size: 14px; color: #303133; cursor: pointer; position: relative;
+            font-size: 14px; color: var(--text-primary);
+            cursor: pointer; position: relative; padding: 4px 8px;
+            border-radius: var(--radius-sm); transition: background .2s;
         }
+        .user-menu:hover { background: var(--bg-hover); }
         .user-avatar {
             width: 34px; height: 34px; border-radius: 50%;
-            background: linear-gradient(135deg, #409eff, #667eea);
+            background: var(--primary-gradient);
             color: #fff; display: flex; align-items: center; justify-content: center;
-            font-size: 15px; font-weight: 600;
+            font-size: 14px; font-weight: 600;
+            box-shadow: 0 2px 6px rgba(22,119,255,0.25);
         }
         .dropdown {
-            position: absolute; top: 46px; right: 0; background: #fff; border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,.1); min-width: 160px; padding: 6px 0; display: none; z-index: 200;
+            position: absolute; top: calc(100% + 8px); right: 0;
+            background: #fff; border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg); min-width: 180px;
+            padding: 8px 0; display: none; z-index: 200;
+            border: 1px solid var(--border-light);
+            animation: fadeInDown .2s ease;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .dropdown.show { display: block; }
         .dropdown-item {
-            display: flex; align-items: center; gap: 8px; padding: 10px 18px;
-            font-size: 13px; color: #606266; cursor: pointer; transition: background .15s;
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 18px; font-size: 13px; color: var(--text-secondary);
+            cursor: pointer; transition: all .15s;
         }
-        .dropdown-item:hover { background: #f5f7fa; color: #409eff; }
-        .dropdown-item.danger:hover { color: #f56c6c; }
-        .dropdown-divider { height: 1px; background: #f0f0f0; margin: 4px 0; }
+        .dropdown-item:hover { background: var(--primary-light); color: var(--primary); }
+        .dropdown-item.danger:hover { background: #fff1f0; color: var(--danger); }
+        .dropdown-divider { height: 1px; background: var(--border-light); margin: 6px 0; }
 
-        /* ===== Hero 区 ===== */
+        /* ===== Hero Section ===== */
         .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff; padding: 48px 24px 40px;
-            position: relative; overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, rgba(22,119,255,0.92) 0%, rgba(64,150,255,0.88) 50%, rgba(102,126,234,0.85) 100%),
+                        url('/images/hero-banner.jpg') center/cover no-repeat;
+            color: #fff; padding: 64px 24px 56px;
+            overflow: hidden;
         }
-        .hero::before {
-            content: ""; position: absolute; top: -50%; right: -20%;
-            width: 600px; height: 600px; border-radius: 50%;
-            background: rgba(255,255,255,0.06);
+        .hero::after {
+            content: ""; position: absolute; bottom: -1px; left: 0; right: 0; height: 40px;
+            background: var(--bg-page); clip-path: ellipse(55% 100% at 50% 100%);
         }
-        .hero-inner { max-width: 1200px; margin: 0 auto; position: relative; }
-        .hero h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
-        .hero p { font-size: 15px; opacity: 0.85; margin-bottom: 28px; }
-        .stats-row { display: flex; gap: 40px; }
-        .stat-item { text-align: center; }
-        .stat-num { font-size: 28px; font-weight: 700; }
-        .stat-num .suffix { font-size: 14px; font-weight: 400; opacity: .8; margin-left: 2px; }
-        .stat-label { font-size: 13px; opacity: .8; margin-top: 4px; }
+        .hero-inner {
+            max-width: 1200px; margin: 0 auto; position: relative; z-index: 1;
+        }
+        .hero-badge {
+            display: inline-block; padding: 4px 12px; border-radius: 12px;
+            background: rgba(255,255,255,0.2); backdrop-filter: blur(8px);
+            font-size: 12px; font-weight: 500; margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .hero h1 {
+            font-size: 36px; font-weight: 700; margin-bottom: 12px;
+            letter-spacing: -0.5px; line-height: 1.3;
+        }
+        .hero p {
+            font-size: 16px; opacity: 0.9; margin-bottom: 32px;
+            font-weight: 400;
+        }
+        .hero-search {
+            display: flex; max-width: 640px; height: 52px;
+            border-radius: 26px; overflow: hidden;
+            background: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            margin-bottom: 40px;
+        }
+        .hero-search input {
+            flex: 1; border: none; outline: none; padding: 0 24px;
+            font-size: 15px; color: var(--text-primary);
+        }
+        .hero-search button {
+            width: 120px; border: none;
+            background: var(--primary-gradient); color: #fff;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: opacity .2s;
+        }
+        .hero-search button:hover { opacity: .9; }
 
-        /* ===== 分类 Tab ===== */
+        .stats-row {
+            display: flex; gap: 48px; flex-wrap: wrap;
+        }
+        .stat-item {
+            text-align: left; position: relative;
+        }
+        .stat-item + .stat-item::before {
+            content: ""; position: absolute; left: -24px; top: 50%;
+            transform: translateY(-50%); width: 1px; height: 32px;
+            background: rgba(255,255,255,0.3);
+        }
+        .stat-num {
+            font-size: 32px; font-weight: 700; line-height: 1.2;
+        }
+        .stat-num .suffix { font-size: 16px; font-weight: 400; opacity: .8; margin-left: 2px; }
+        .stat-label { font-size: 13px; opacity: .85; margin-top: 4px; font-weight: 400; }
+
+        /* ===== Category Tabs ===== */
         .category-bar {
-            background: #fff; border-bottom: 1px solid #ebeef5;
-            position: sticky; top: 60px; z-index: 50;
+            background: #fff;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky; top: 64px; z-index: 50;
+            box-shadow: var(--shadow-sm);
         }
         .category-bar-inner {
             max-width: 1200px; margin: 0 auto; display: flex;
-            padding: 0 24px; gap: 8px;
+            padding: 0 24px; gap: 4px;
         }
         .cat-tab {
-            padding: 14px 24px; font-size: 15px; color: #606266; cursor: pointer;
-            border-bottom: 2px solid transparent; transition: all .2s;
-            font-weight: 500; position: relative;
+            padding: 16px 28px; font-size: 15px; color: var(--text-secondary);
+            cursor: pointer; border-bottom: 2px solid transparent;
+            transition: all .2s ease; font-weight: 500; position: relative;
         }
-        .cat-tab:hover { color: #409eff; }
-        .cat-tab.active { color: #409eff; border-bottom-color: #409eff; }
+        .cat-tab:hover { color: var(--primary); }
+        .cat-tab.active {
+            color: var(--primary); font-weight: 600;
+            border-bottom-color: var(--primary);
+        }
 
-        /* ===== 主内容 ===== */
+        /* ===== Main Content ===== */
         .main {
-            max-width: 1200px; margin: 0 auto; padding: 24px 24px 40px;
+            max-width: 1200px; margin: 0 auto;
+            padding: 32px 24px 48px;
         }
 
-        /* 热门城市 */
-        .hot-cities { margin-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .hot-label { font-size: 13px; color: #909399; margin-right: 4px; }
+        /* Hot Cities */
+        .hot-cities {
+            background: #fff; border-radius: var(--radius-md);
+            padding: 16px 20px; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            box-shadow: var(--shadow-card);
+        }
+        .hot-label {
+            font-size: 13px; color: var(--text-tertiary);
+            margin-right: 4px; font-weight: 500;
+        }
         .hot-city {
-            font-size: 13px; color: #606266; padding: 4px 12px; border-radius: 14px;
-            cursor: pointer; transition: all .2s; border: 1px solid transparent;
+            font-size: 13px; color: var(--text-secondary);
+            padding: 5px 14px; border-radius: 16px;
+            cursor: pointer; transition: all .2s ease;
+            background: var(--bg-page);
         }
-        .hot-city:hover { color: #409eff; background: #ecf5ff; }
-        .hot-city.active { color: #fff; background: #409eff; border-color: #409eff; }
+        .hot-city:hover {
+            color: var(--primary); background: var(--primary-light);
+        }
+        .hot-city.active {
+            color: #fff; background: var(--primary-gradient);
+            box-shadow: 0 2px 6px rgba(22,119,255,0.3);
+        }
 
-        /* 筛选行 */
+        /* Filter Row */
         .filter-row {
-            background: #fff; border-radius: 10px; padding: 16px 20px;
-            margin-bottom: 16px; display: flex; align-items: center; gap: 16px;
-            flex-wrap: wrap; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            background: #fff; border-radius: var(--radius-md);
+            padding: 20px 24px; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 20px;
+            flex-wrap: wrap; box-shadow: var(--shadow-card);
         }
         .filter-item { display: flex; align-items: center; gap: 8px; }
-        .filter-item label { font-size: 13px; color: #909399; white-space: nowrap; }
+        .filter-item label {
+            font-size: 13px; color: var(--text-tertiary);
+            white-space: nowrap; font-weight: 500;
+        }
         .filter-item select, .filter-item input {
-            height: 34px; border: 1px solid #dcdfe6; border-radius: 6px;
-            padding: 0 10px; font-size: 13px; outline: none; background: #fff;
-            transition: border-color .2s; font-family: inherit; color: #303133;
+            height: 36px; border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0 12px; font-size: 13px; outline: none;
+            background: #fff; transition: all .2s ease;
+            font-family: inherit; color: var(--text-primary);
         }
-        .filter-item select:focus, .filter-item input:focus { border-color: #409eff; }
-        .filter-item select { min-width: 100px; cursor: pointer; }
-        .filter-item input { width: 220px; }
+        .filter-item select:focus, .filter-item input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(22,119,255,0.1);
+        }
+        .filter-item select { min-width: 120px; cursor: pointer; }
+        .filter-item input { width: 240px; }
         .btn-reset {
-            margin-left: auto; height: 34px; padding: 0 20px;
-            border: 1px solid #dcdfe6; border-radius: 6px; background: #fff;
-            font-size: 13px; color: #606266; cursor: pointer; transition: all .2s;
+            margin-left: auto; height: 36px; padding: 0 20px;
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            background: #fff; font-size: 13px; color: var(--text-secondary);
+            cursor: pointer; transition: all .2s ease; font-weight: 500;
         }
-        .btn-reset:hover { border-color: #409eff; color: #409eff; }
+        .btn-reset:hover {
+            border-color: var(--primary); color: var(--primary);
+            background: var(--primary-light);
+        }
 
-        .result-info { font-size: 13px; color: #909399; margin-bottom: 12px; }
-        .result-info strong { color: #409eff; font-size: 16px; margin: 0 2px; }
+        .result-info {
+            font-size: 14px; color: var(--text-tertiary);
+            margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+        }
+        .result-info strong {
+            color: var(--primary); font-size: 18px; font-weight: 700;
+        }
 
-        /* 职位列表 */
-        .job-list { display: flex; flex-direction: column; gap: 12px; }
+        /* Job List */
+        .job-list { display: flex; flex-direction: column; gap: 14px; }
         .job-item {
-            background: #fff; border-radius: 10px; padding: 20px;
-            display: flex; align-items: center; gap: 16px; cursor: pointer;
-            transition: all .2s; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            background: #fff; border-radius: var(--radius-md);
+            padding: 24px; display: flex; align-items: center; gap: 20px;
+            cursor: pointer; transition: all .25s ease;
+            box-shadow: var(--shadow-card);
             border: 1px solid transparent;
+            position: relative; overflow: hidden;
         }
-        .job-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: #e4e7ed; transform: translateY(-1px); }
+        .job-item::before {
+            content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px; background: var(--primary-gradient);
+            opacity: 0; transition: opacity .25s ease;
+        }
+        .job-item:hover {
+            box-shadow: var(--shadow-card-hover);
+            border-color: var(--border);
+            transform: translateY(-2px);
+        }
+        .job-item:hover::before { opacity: 1; }
+
         .job-logo {
-            width: 56px; height: 56px; border-radius: 10px; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
+            width: 64px; height: 64px; border-radius: var(--radius-md);
+            flex-shrink: 0; display: flex; align-items: center; justify-content: center;
             font-size: 22px; font-weight: 700; color: #fff;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: var(--primary-gradient);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .job-logo img {
+            width: 100%; height: 100%; object-fit: cover;
         }
         .job-logo.tencent { background: linear-gradient(135deg, #0052d9, #0066ff); }
         .job-logo.alibaba { background: linear-gradient(135deg, #ff6a00, #ff5000); }
         .job-logo.bytedance { background: linear-gradient(135deg, #3370ff, #0048ff); }
+        .job-logo.meituan { background: linear-gradient(135deg, #ffd100, #ffc300); }
+        .job-logo.baidu { background: linear-gradient(135deg, #2319dc, #3c4eff); }
+        .job-logo.jd { background: linear-gradient(135deg, #e1251b, #c81623); }
+
         .job-body { flex: 1; min-width: 0; }
         .job-title-row {
             display: flex; align-items: center; gap: 8px;
-            margin-bottom: 6px; flex-wrap: wrap;
+            margin-bottom: 10px; flex-wrap: wrap;
         }
-        .job-company { font-size: 14px; color: #909399; font-weight: 500; }
-        .job-title { font-size: 16px; font-weight: 600; color: #303133; }
-        .job-item:hover .job-title { color: #409eff; }
+        .job-company {
+            font-size: 13px; color: var(--text-tertiary);
+            font-weight: 500;
+        }
+        .job-title {
+            font-size: 17px; font-weight: 600;
+            color: var(--text-primary);
+            transition: color .2s ease;
+        }
+        .job-item:hover .job-title { color: var(--primary); }
+
         .job-tag {
-            display: inline-block; padding: 2px 8px; border-radius: 4px;
-            font-size: 12px; font-weight: 500;
+            display: inline-block; padding: 2px 10px;
+            border-radius: 4px; font-size: 12px; font-weight: 500;
+            line-height: 1.6;
         }
-        .tag-social { background: #ecf5ff; color: #409eff; }
-        .tag-campus { background: #fdf6ec; color: #e6a23c; }
-        .tag-intern { background: #f0f9eb; color: #67c23a; }
-        .tag-education { background: #f4f4f5; color: #909399; }
-        .tag-experience { background: #faf0f9; color: #c039d3; }
-        .job-salary { font-size: 17px; font-weight: 700; color: #f56c6c; margin-left: auto; }
-        .job-meta { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #909399; flex-wrap: wrap; }
-        .dot { color: #dcdfe6; }
-        .job-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0; }
+        .tag-social { background: var(--primary-light); color: var(--primary); }
+        .tag-campus { background: #fff7e6; color: var(--warning); }
+        .tag-intern { background: #e8ffea; color: var(--success); }
+        .tag-education { background: var(--bg-page); color: var(--text-tertiary); }
+        .tag-experience { background: #f9f0ff; color: #722ed1; }
+
+        .job-salary {
+            font-size: 18px; font-weight: 700; color: var(--danger);
+            margin-left: auto; white-space: nowrap;
+        }
+        .job-meta {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 13px; color: var(--text-tertiary); flex-wrap: wrap;
+        }
+        .job-meta .sep {
+            color: var(--text-placeholder);
+            margin: 0 4px;
+        }
+        .job-meta span { display: inline-flex; align-items: center; gap: 4px; }
+
+        .job-right {
+            display: flex; flex-direction: column;
+            align-items: flex-end; gap: 12px; flex-shrink: 0;
+        }
         .btn-apply {
-            padding: 8px 20px; border: none; border-radius: 6px; color: #fff;
-            font-size: 14px; font-weight: 500; cursor: pointer;
-            background: linear-gradient(90deg, #67c23a, #85ce61); transition: all .2s;
+            padding: 9px 24px; border: none; border-radius: var(--radius-sm);
+            color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+            background: var(--primary-gradient);
+            transition: all .2s ease;
+            box-shadow: 0 2px 6px rgba(22,119,255,0.3);
         }
-        .btn-apply:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(103,194,58,.4); }
+        .btn-apply:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(22,119,255,0.4);
+        }
+        .btn-apply:active { transform: translateY(0); }
+
         .btn-fav {
-            background: none; border: none; font-size: 18px; cursor: pointer;
-            color: #c0c4cc; transition: all .2s; padding: 4px;
+            background: none; border: none; font-size: 18px;
+            cursor: pointer; color: var(--text-placeholder);
+            transition: all .2s ease; padding: 4px;
         }
-        .btn-fav:hover { color: #f56c6c; transform: scale(1.15); }
-        .btn-fav.faved { color: #f56c6c; }
-        .job-post-date { font-size: 12px; color: #c0c4cc; }
+        .btn-fav:hover { color: var(--danger); transform: scale(1.15); }
+        .btn-fav.faved { color: var(--danger); }
+        .job-post-date { font-size: 12px; color: var(--text-placeholder); }
 
-        /* 空状态 */
-        .empty { text-align: center; padding: 60px 20px; color: #909399; }
-        .empty .icon { font-size: 56px; margin-bottom: 12px; opacity: .5; }
+        /* Empty State */
+        .empty {
+            text-align: center; padding: 80px 20px;
+            color: var(--text-tertiary);
+        }
+        .empty .icon {
+            font-size: 64px; margin-bottom: 16px; opacity: 0.4;
+        }
+        .empty p { font-size: 14px; }
 
-        /* 分页 */
-        .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 28px; }
+        /* Pagination */
+        .pagination {
+            display: flex; justify-content: center; gap: 8px;
+            margin-top: 32px; flex-wrap: wrap;
+        }
         .page-btn {
-            min-width: 36px; height: 36px; padding: 0 12px; border: 1px solid #dcdfe6;
-            border-radius: 6px; background: #fff; font-size: 14px; color: #606266;
-            cursor: pointer; transition: all .2s;
+            min-width: 38px; height: 38px; padding: 0 14px;
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            background: #fff; font-size: 14px; color: var(--text-secondary);
+            cursor: pointer; transition: all .2s ease;
+            font-weight: 500;
         }
-        .page-btn:hover:not(:disabled) { border-color: #409eff; color: #409eff; }
-        .page-btn.active { background: #409eff; color: #fff; border-color: #409eff; }
-        .page-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--primary); color: var(--primary);
+            background: var(--primary-light);
+        }
+        .page-btn.active {
+            background: var(--primary-gradient); color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 2px 6px rgba(22,119,255,0.3);
+        }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+        /* Footer */
         .footer {
-            text-align: center; padding: 24px; color: #c0c4cc; font-size: 12px;
-            background: #fff; border-top: 1px solid #ebeef5; margin-top: 20px;
+            text-align: center; padding: 40px 24px;
+            color: var(--text-tertiary); font-size: 13px;
+            background: #fff; border-top: 1px solid var(--border-light);
+            margin-top: 40px; line-height: 1.8;
         }
+        .footer a { color: var(--text-secondary); margin: 0 8px; }
+        .footer a:hover { color: var(--primary); }
+        .footer .copyright { color: var(--text-placeholder); margin-top: 8px; font-size: 12px; }
 
+        /* Toast */
         .toast {
-            position: fixed; top: 30%; left: 50%; transform: translateX(-50%);
-            padding: 12px 24px; background: rgba(0,0,0,.75); color: #fff;
-            border-radius: 8px; font-size: 14px; z-index: 999;
-            opacity: 0; transition: opacity .3s; pointer-events: none;
+            position: fixed; top: 30%; left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            background: rgba(31,35,41,0.92); color: #fff;
+            border-radius: var(--radius-md);
+            font-size: 14px; z-index: 999;
+            opacity: 0; transition: all .3s ease;
+            pointer-events: none;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(8px);
         }
-        .toast.show { opacity: 1; }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-8px);
+        }
 
-        @media (max-width: 900px) {
-            .stats-row { gap: 24px; }
-            .job-salary { margin-left: 0; }
-            .job-item { flex-wrap: wrap; }
+        /* ===== Responsive ===== */
+        @media (max-width: 1024px) {
+            .nav-inner { gap: 16px; padding: 0 16px; }
+            .search-box { max-width: 320px; }
+            .stats-row { gap: 32px; }
+            .stat-item + .stat-item::before { display: none; }
+            .stat-item { text-align: center; }
         }
         @media (max-width: 768px) {
-            .top-nav-inner { padding: 0 12px; gap: 12px; flex-wrap: wrap; height: auto; padding-top: 10px; padding-bottom: 10px; }
-            .search-box { order: 10; max-width: 100%; width: 100%; }
-            .hero { padding: 32px 16px; }
-            .hero h1 { font-size: 24px; }
-            .main { padding: 16px 12px; }
-            .stat-num { font-size: 22px; }
-            .filter-item input { width: 150px; }
-            .job-right { flex-direction: row; align-items: center; width: 100%; justify-content: space-between; }
+            .nav-inner {
+                padding: 0 12px; gap: 10px;
+                flex-wrap: wrap; height: auto;
+                padding-top: 10px; padding-bottom: 10px;
+            }
+            .nav-links { order: 3; width: 100%; justify-content: center; padding: 4px 0; }
+            .nav-link.active::after { display: none; }
+            .search-box { order: 2; max-width: 100%; width: 100%; }
+            .nav-actions { order: 1; margin-left: auto; }
+            .hero { padding: 40px 16px 48px; }
+            .hero h1 { font-size: 26px; }
+            .hero p { font-size: 14px; margin-bottom: 24px; }
+            .hero-search { height: 44px; }
+            .hero-search button { width: 90px; font-size: 14px; }
+            .stats-row { gap: 20px; justify-content: flex-start; }
+            .stat-num { font-size: 24px; }
+            .main { padding: 20px 12px; }
+            .category-bar-inner { overflow-x: auto; padding: 0 12px; }
+            .cat-tab { padding: 14px 16px; font-size: 14px; white-space: nowrap; }
+            .filter-row { padding: 16px; gap: 12px; }
+            .filter-item input { width: 140px; }
+            .filter-item select { min-width: 100px; }
+            .btn-reset { margin-left: 0; width: 100%; }
+            .job-item { flex-wrap: wrap; padding: 16px; gap: 14px; }
+            .job-salary { margin-left: 0; width: 100%; }
+            .job-right {
+                flex-direction: row; align-items: center;
+                width: 100%; justify-content: space-between;
+            }
+            .job-logo { width: 52px; height: 52px; font-size: 18px; }
+            .job-title { font-size: 15px; }
+            .hot-cities { padding: 12px 16px; }
+        }
+        @media (max-width: 480px) {
+            .btn-enterprise { display: none; }
+            .btn-nav { padding: 6px 10px; font-size: 13px; }
+            .brand { font-size: 18px; }
+            .hero h1 { font-size: 22px; }
+            .stat-num { font-size: 20px; }
+            .stats-row { gap: 16px; }
+            .stat-item { flex: 1 1 auto; min-width: calc(50% - 8px); }
+            .filter-item { width: 100%; }
+            .filter-item input { width: 100%; }
         }
     </style>
 </head>
 <body>
 
 <nav class="top-nav">
-    <div class="top-nav-inner">
-        <a href="/portal" class="brand">ATS 招聘</a>
+    <div class="nav-inner">
+        <a href="/portal" class="brand">
+            <span class="brand-icon">A</span>
+            ATS 招聘
+        </a>
+        <div class="nav-links">
+            <a href="/portal" class="nav-link active">首页</a>
+            <a href="/portal" class="nav-link">职位</a>
+            <a href="/portal" class="nav-link">公司</a>
+            <a href="/portal/profile" class="nav-link" id="profileNav" style="display:none">我的</a>
+        </div>
         <div class="search-box">
             <input id="keywordInput" type="text" placeholder="搜索职位、公司、技能...">
             <button onclick="doSearch()">搜索</button>
         </div>
         <div class="nav-actions">
-            <a href="/portal" style="font-size:14px;color:#409eff;font-weight:500;">首页</a>
-            <a href="/portal/profile" id="profileLink" class="admin-entry" style="display:none">个人中心</a>
-            <a href="/dashboard" class="admin-entry" title="企业管理端">企业入口 →</a>
+            <a href="/dashboard" class="btn-enterprise">企业入口 →</a>
             <div id="guestArea">
-                <a href="/login" class="btn-login">登录</a>
-                <a href="/register" class="btn-register">注册</a>
+                <a href="/login" class="btn-nav btn-login">登录</a>
+                <a href="/register" class="btn-nav btn-register">注册</a>
             </div>
             <div id="userArea" class="user-menu" style="display:none" onclick="toggleDropdown(event)">
                 <div class="user-avatar" id="userAvatar"></div>
@@ -294,14 +602,34 @@
 
 <section class="hero">
     <div class="hero-inner">
+        <span class="hero-badge">🎉 新用户注册立享专属福利</span>
         <h1>找到心仪的工作，开启职业新篇章</h1>
         <p>海量优质岗位 · 智能筛选匹配 · 快速投递反馈</p>
+        <div class="hero-search">
+            <input id="heroKeywordInput" type="text" placeholder="搜索职位、公司名称或技能关键词">
+            <button onclick="heroSearch()">搜索职位</button>
+        </div>
         <div class="stats-row">
-            <div class="stat-item"><div class="stat-num" id="statTotal">0<span class="suffix">+</span></div><div class="stat-label">在招岗位</div></div>
-            <div class="stat-item"><div class="stat-num" id="statCompanies">0</div><div class="stat-label">合作企业</div></div>
-            <div class="stat-item"><div class="stat-num" id="statSocial">0</div><div class="stat-label">社招岗位</div></div>
-            <div class="stat-item"><div class="stat-num" id="statCampus">0</div><div class="stat-label">校招岗位</div></div>
-            <div class="stat-item"><div class="stat-num" id="statIntern">0</div><div class="stat-label">实习岗位</div></div>
+            <div class="stat-item">
+                <div class="stat-num" id="statTotal">0<span class="suffix">+</span></div>
+                <div class="stat-label">在招岗位</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="statCompanies">0</div>
+                <div class="stat-label">合作企业</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="statSocial">0</div>
+                <div class="stat-label">社招岗位</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="statCampus">0</div>
+                <div class="stat-label">校招岗位</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="statIntern">0</div>
+                <div class="stat-label">实习岗位</div>
+            </div>
         </div>
     </div>
 </section>
@@ -316,13 +644,11 @@
 </div>
 
 <main class="main">
-    <!-- 热门城市 -->
     <div class="hot-cities">
         <span class="hot-label">🔥 热门城市：</span>
         <span class="hot-city active" data-city="" onclick="selectHotCity(this,'')">不限</span>
     </div>
 
-    <!-- 筛选 -->
     <div class="filter-row">
         <div class="filter-item">
             <label>省份</label>
@@ -338,18 +664,64 @@
         </div>
         <div class="filter-item">
             <label>关键词</label>
-            <input id="filterKeyword" type="text" placeholder="职位/技能/公司" onkeydown="if(event.key==='Enter'){doSearch()}">
+            <input id="filterKeyword" type="text" placeholder="职位/技能/公司"
+                   onkeydown="if(event.key==='Enter'){doSearch()}">
+        </div>
+        <div class="filter-item">
+            <label>薪资</label>
+            <select id="salarySelect" onchange="onSalaryChange()">
+                <option value="">不限</option>
+                <option value="10K以下">10K以下</option>
+                <option value="10-20K">10-20K</option>
+                <option value="20-40K">20-40K</option>
+                <option value="40K以上">40K以上</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label>经验</label>
+            <select id="experienceSelect" onchange="onExperienceChange()">
+                <option value="">不限</option>
+                <option value="应届生">应届生</option>
+                <option value="1-3年">1-3年</option>
+                <option value="3-5年">3-5年</option>
+                <option value="5-10年">5-10年</option>
+                <option value="10年以上">10年以上</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label>学历</label>
+            <select id="educationSelect" onchange="onEducationChange()">
+                <option value="">不限</option>
+                <option value="大专">大专</option>
+                <option value="本科">本科</option>
+                <option value="硕士">硕士</option>
+                <option value="博士">博士</option>
+            </select>
         </div>
         <button class="btn-reset" onclick="resetFilter()">重置</button>
     </div>
 
-    <div class="result-info">共找到 <strong id="totalCount">0</strong> 个职位</div>
+    <div class="result-info">
+        共找到 <strong id="totalCount">0</strong> 个职位
+    </div>
 
     <div id="jobList" class="job-list"></div>
     <div id="pagination" class="pagination"></div>
 </main>
 
-<footer class="footer">© 2026 ATS 招聘 · Powered by Spring Boot + Thymeleaf · 演示项目</footer>
+<footer class="footer">
+    <div>
+        <a href="/portal">首页</a>·
+        <a href="/portal">职位</a>·
+        <a href="/portal">公司</a>·
+        <a href="/login">企业服务</a>·
+        <a href="/register">关于我们</a>
+    </div>
+    <div class="copyright">
+        © 2026 ATS 招聘 · Powered by Spring Boot + Thymeleaf · 演示项目
+    </div>
+</footer>
+
 <div id="toast" class="toast"></div>
 
 <script src="/cities.js"></script>
@@ -360,29 +732,31 @@ const USER_KEY  = 'ATS_USER';
 const PAGE_SIZE = 10;
 
 let state = {
-    current: 1, category: '', province: '', city: '', keyword: '', total: 0, pages: 0
+    current: 1, category: '', province: '', city: '', keyword: '', salary: '', experience: '', education: '', total: 0, pages: 0
 };
 
-// ============ 鉴权 UI ============
+// ============ Auth UI ============
 function initAuthUI() {
     const token = localStorage.getItem(TOKEN_KEY);
     const userStr = localStorage.getItem(USER_KEY);
     const guestArea = document.getElementById('guestArea');
     const userArea = document.getElementById('userArea');
     const profileLink = document.getElementById('profileLink');
+    const profileNav = document.getElementById('profileNav');
     if (token && userStr) {
         try {
             const user = JSON.parse(userStr);
             guestArea.style.display = 'none';
             userArea.style.display = 'flex';
             profileLink.style.display = '';
+            profileNav.style.display = '';
             document.getElementById('userName').innerText = user.realName || user.username;
             document.getElementById('userAvatar').innerText = (user.realName || user.username).charAt(0).toUpperCase();
         } catch (e) {
-            guestArea.style.display = ''; userArea.style.display = 'none'; profileLink.style.display = 'none';
+            guestArea.style.display = ''; userArea.style.display = 'none'; profileLink.style.display = 'none'; profileNav.style.display = 'none';
         }
     } else {
-        guestArea.style.display = ''; userArea.style.display = 'none'; profileLink.style.display = 'none';
+        guestArea.style.display = ''; userArea.style.display = 'none'; profileLink.style.display = 'none'; profileNav.style.display = 'none';
     }
     if (token) {
         fetch('/api/auth/me', { credentials: 'include' }).then(r => r.json()).then(json => {
@@ -407,7 +781,7 @@ async function handleLogout() {
     showToast('已退出登录'); setTimeout(() => location.reload(), 500);
 }
 
-// ============ 工具 ============
+// ============ Utilities ============
 function authHeaders() {
     const token = localStorage.getItem(TOKEN_KEY);
     const headers = { 'Content-Type': 'application/json' };
@@ -425,6 +799,9 @@ function companyLogoClass(name) {
     if (name.indexOf('腾讯') >= 0) return 'tencent';
     if (name.indexOf('阿里') >= 0) return 'alibaba';
     if (name.indexOf('字节') >= 0) return 'bytedance';
+    if (name.indexOf('美团') >= 0) return 'meituan';
+    if (name.indexOf('百度') >= 0) return 'baidu';
+    if (name.indexOf('京东') >= 0) return 'jd';
     return '';
 }
 function companyLogoText(name, fallback) {
@@ -433,6 +810,16 @@ function companyLogoText(name, fallback) {
         return name.charAt(0);
     }
     return fallback || '?';
+}
+function companyLogoImg(name) {
+    if (!name) return '';
+    if (name.indexOf('腾讯') >= 0) return '/images/logo-tencent.jpg';
+    if (name.indexOf('阿里') >= 0) return '/images/logo-alibaba.jpg';
+    if (name.indexOf('字节') >= 0) return '/images/logo-bytedance.jpg';
+    if (name.indexOf('美团') >= 0) return '/images/logo-meituan.jpg';
+    if (name.indexOf('百度') >= 0) return '/images/logo-baidu.jpg';
+    if (name.indexOf('京东') >= 0) return '/images/logo-jd.jpg';
+    return '';
 }
 function formatDate(dt) {
     if (!dt) return '';
@@ -449,9 +836,8 @@ function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-// ============ 省市级联 ============
+// ============ Province-City Cascading ============
 function initRegionSelects() {
-    // 容错：如果cities.js未加载成功，使用内置备用数据
     var regions = window.CHINA_REGIONS;
     var hotCities = window.HOT_CITIES;
     if (!regions || !regions.length) {
@@ -479,16 +865,14 @@ function initRegionSelects() {
     }
 
     const provSel = document.getElementById('provinceSelect');
-    // 清空现有选项（保留"全部省份"）
     provSel.innerHTML = '<option value="">全部省份</option>';
     regions.forEach(r => {
         const opt = document.createElement('option');
         opt.value = r.name; opt.innerText = r.name;
         provSel.appendChild(opt);
     });
-    // 热门城市
+
     const hotBox = document.querySelector('.hot-cities');
-    // 先清除之前动态添加的热门城市（保留"不限"）
     const existingHots = hotBox.querySelectorAll('.hot-city:not([data-city=""])');
     existingHots.forEach(el => el.remove());
     hotCities.forEach(c => {
@@ -519,12 +903,10 @@ function selectHotCity(el, city) {
     document.querySelectorAll('.hot-city').forEach(s => s.classList.remove('active'));
     if (el) el.classList.add('active');
     if (!city) {
-        // 不限
         document.getElementById('provinceSelect').value = '';
         document.getElementById('citySelect').innerHTML = '<option value="">全部城市</option>';
         state.province = ''; state.city = '';
     } else {
-        // 根据城市自动选中省份
         const regions = window.CHINA_REGIONS || [];
         for (const r of regions) {
             if (r.cities.includes(city)) {
@@ -545,7 +927,7 @@ function selectHotCity(el, city) {
     loadData(1);
 }
 
-// ============ 数据加载 ============
+// ============ Data Loading ============
 async function loadStats() {
     try {
         const json = await fetch('/api/portal/stats').then(r => r.json());
@@ -563,12 +945,18 @@ async function loadData(page) {
     state.current = page || 1;
     state.city = document.getElementById('citySelect').value;
     state.keyword = document.getElementById('filterKeyword').value.trim();
+    state.salary = document.getElementById('salarySelect').value;
+    state.experience = document.getElementById('experienceSelect').value;
+    state.education = document.getElementById('educationSelect').value;
     document.getElementById('keywordInput').value = state.keyword;
 
     const params = new URLSearchParams({ current: state.current, size: PAGE_SIZE });
     if (state.category) params.set('category', state.category);
     if (state.city) params.set('location', state.city);
     if (state.keyword) params.set('keyword', state.keyword);
+    if (state.salary) params.set('salary', state.salary);
+    if (state.experience) params.set('experience', state.experience);
+    if (state.education) params.set('education', state.education);
 
     const listEl = document.getElementById('jobList');
     listEl.innerHTML = '<div class="empty"><div class="icon">⏳</div><p>加载中...</p></div>';
@@ -605,6 +993,7 @@ function renderList(records) {
     listEl.innerHTML = records.map(p => {
         const logoText = companyLogoText(p.companyLogo || p.companyName, (p.title||'?').charAt(0));
         const logoCls = companyLogoClass(p.companyName);
+        const logoImg = companyLogoImg(p.companyName);
         const catLabel = categoryLabel(p.category);
         const catCls = categoryClass(p.category);
         const edu = p.education ? '<span class="job-tag tag-education">' + escapeHtml(p.education) + '</span>' : '';
@@ -617,18 +1006,22 @@ function renderList(records) {
         const favCls = p.favorited ? 'faved' : '';
         const favIcon = p.favorited ? '❤️' : '🤍';
 
+        const logoContent = logoImg
+            ? '<img src="' + logoImg + '" alt="" onerror="this.style.display=\'none\';this.parentNode.innerHTML+=\'' + escapeHtml(logoText) + '\'">'
+            : escapeHtml(logoText);
+
         return '<div class="job-item" onclick="goDetail(' + p.id + ', event)">' +
-            '<div class="job-logo ' + logoCls + '">' + escapeHtml(logoText) + '</div>' +
+            '<div class="job-logo ' + logoCls + '">' + logoContent + '</div>' +
             '<div class="job-body">' +
                 '<div class="job-title-row">' +
-                    (company ? company + ' <span class="dot" style="color:#dcdfe6;">·</span> ' : '') +
+                    (company ? company + ' <span class="job-title">·</span> ' : '') +
                     '<span class="job-title">' + escapeHtml(p.title) + '</span>' +
                     (catLabel ? '<span class="job-tag ' + catCls + '">' + catLabel + '</span>' : '') +
                     edu + exp +
                 '</div>' +
                 '<div class="job-meta">' +
                     '<span>📍 ' + escapeHtml(loc) + '</span>' +
-                    (dept ? '<span class="dot">|</span><span>' + escapeHtml(dept) + '</span>' : '') +
+                    (dept ? '<span class="sep">|</span><span>' + escapeHtml(dept) + '</span>' : '') +
                 '</div>' +
             '</div>' +
             '<div class="job-right">' +
@@ -660,7 +1053,7 @@ function renderPagination() {
     pg.innerHTML = html;
 }
 
-// ============ 收藏 ============
+// ============ Favorites ============
 async function toggleFav(e, positionId, btnEl) {
     e.stopPropagation();
     const token = localStorage.getItem(TOKEN_KEY);
@@ -680,7 +1073,7 @@ async function toggleFav(e, positionId, btnEl) {
     } catch(err) { showToast('操作失败'); }
 }
 
-// ============ 交互 ============
+// ============ Interactions ============
 function switchCategory(el, cat) {
     document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
@@ -691,14 +1084,37 @@ function doSearch() {
     document.getElementById('filterKeyword').value = kw;
     state.keyword = kw; loadData(1);
 }
+function heroSearch() {
+    const kw = document.getElementById('heroKeywordInput').value.trim();
+    document.getElementById('keywordInput').value = kw;
+    document.getElementById('filterKeyword').value = kw;
+    state.keyword = kw; loadData(1);
+}
+function onSalaryChange() {
+    state.salary = document.getElementById('salarySelect').value;
+    loadData(1);
+}
+function onExperienceChange() {
+    state.experience = document.getElementById('experienceSelect').value;
+    loadData(1);
+}
+function onEducationChange() {
+    state.education = document.getElementById('educationSelect').value;
+    loadData(1);
+}
 function resetFilter() {
     document.getElementById('provinceSelect').value = '';
     document.getElementById('citySelect').innerHTML = '<option value="">全部城市</option>';
     document.getElementById('filterKeyword').value = '';
     document.getElementById('keywordInput').value = '';
+    document.getElementById('heroKeywordInput').value = '';
+    document.getElementById('salarySelect').value = '';
+    document.getElementById('experienceSelect').value = '';
+    document.getElementById('educationSelect').value = '';
     document.querySelectorAll('.hot-city').forEach(s => s.classList.remove('active'));
     document.querySelector('.hot-city[data-city=""]').classList.add('active');
     state.province = ''; state.city = ''; state.keyword = '';
+    state.salary = ''; state.experience = ''; state.education = '';
     loadData(1);
 }
 function goDetail(id, e) {
@@ -716,12 +1132,16 @@ async function applyJob(e, positionId) {
     window.location.href = '/portal/position/' + positionId + '?apply=1';
 }
 
-// 顶部搜索框回车
+// Enter key on top search
 document.getElementById('keywordInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') doSearch();
 });
+// Enter key on hero search
+document.getElementById('heroKeywordInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') heroSearch();
+});
 
-// ============ 启动 ============
+// ============ Init ============
 initRegionSelects();
 initAuthUI();
 loadStats();
