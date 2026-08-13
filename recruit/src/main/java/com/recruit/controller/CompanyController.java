@@ -1,8 +1,10 @@
 package com.recruit.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.recruit.common.BusinessException;
 import com.recruit.common.R;
 import com.recruit.entity.Company;
+import com.recruit.security.UserContext;
 import com.recruit.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +14,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 企业管理控制器
+ * <p>
+ * 提供企业信息的CRUD接口。
+ * 安全策略：HR仅能查看企业信息，只有管理员(ADMIN)可创建/修改/删除企业。
+ */
 @RestController
 @RequestMapping("/api/companies")
 @RequiredArgsConstructor
@@ -42,23 +50,36 @@ public class CompanyController {
     }
 
     @PostMapping
-    @Operation(summary = "新建公司")
+    @Operation(summary = "新建公司（仅管理员）")
     public R<Long> create(@RequestBody Company company) {
+        assertAdmin();
         return R.ok(companyService.create(company));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "更新公司信息")
+    @Operation(summary = "更新公司信息（仅管理员）")
     public R<Void> update(@PathVariable Long id, @RequestBody Company company) {
+        assertAdmin();
         company.setId(id);
         companyService.update(company);
         return R.ok();
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "删除公司")
+    @Operation(summary = "删除公司（仅管理员）")
     public R<Void> delete(@PathVariable Long id) {
+        assertAdmin();
         companyService.delete(id);
         return R.ok();
+    }
+
+    /**
+     * 校验当前登录用户是否为管理员，非管理员抛出403异常
+     */
+    private void assertAdmin() {
+        UserContext.LoginUser user = UserContext.get();
+        if (user == null || !"ADMIN".equals(user.getRole())) {
+            throw new BusinessException(403, "无权限操作，仅管理员可管理企业信息");
+        }
     }
 }

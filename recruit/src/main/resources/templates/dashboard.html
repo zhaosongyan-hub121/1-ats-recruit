@@ -1303,7 +1303,7 @@
                 var html = '<div class="company-info-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;">'
                     + '<div><h3>' + escapeHtml(co.name) + '</h3>'
                     + '<div style="font-size:13px;opacity:0.9;">行业: ' + escapeHtml(co.industry || '-') + '</div></div>'
-                    + '<button class="btn-primary" onclick="window.__editCompany(' + co.id + ')">✏️ 编辑信息</button></div>'
+                    + (state.role === 'ADMIN' ? '<button class="btn-primary" onclick="window.__editCompany(' + co.id + ')">✏️ 编辑信息</button>' : '<span class="status-tag tag-info">仅查看</span>') + '</div>'
                     + '<div style="margin-top:16px;">'
                     + '<div class="info-row"><span>📍 地点:</span>' + escapeHtml(co.location || '-') + '</div>'
                     + '<div class="info-row"><span>🌐 网站:</span>' + escapeHtml(co.website || '-') + '</div>'

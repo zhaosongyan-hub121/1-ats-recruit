@@ -571,8 +571,8 @@
         </a>
         <div class="nav-links">
             <a href="/portal" class="nav-link active">首页</a>
-            <a href="/portal" class="nav-link">职位</a>
-            <a href="/portal" class="nav-link">公司</a>
+            <a href="/portal?scroll=positions" class="nav-link">职位</a>
+            <a href="/portal?scroll=companies" class="nav-link">公司</a>
             <a href="/portal/profile" class="nav-link" id="profileNav" style="display:none">我的</a>
         </div>
         <div class="search-box">
@@ -580,7 +580,8 @@
             <button onclick="doSearch()">搜索</button>
         </div>
         <div class="nav-actions">
-            <a href="/dashboard" class="btn-enterprise">企业入口 →</a>
+            <a href="/portal/profile" class="btn-enterprise" id="profileLink" style="display:none">个人中心 →</a>
+            <a href="/dashboard" class="btn-enterprise" id="hrEntryLink" style="display:none">HR工作台 →</a>
             <div id="guestArea">
                 <a href="/login" class="btn-nav btn-login">登录</a>
                 <a href="/register" class="btn-nav btn-register">注册</a>
@@ -643,7 +644,7 @@
     </div>
 </div>
 
-<main class="main">
+<main class="main" id="positions">
     <div class="hot-cities">
         <span class="hot-label">🔥 热门城市：</span>
         <span class="hot-city active" data-city="" onclick="selectHotCity(this,'')">不限</span>
@@ -709,11 +710,19 @@
     <div id="pagination" class="pagination"></div>
 </main>
 
+<section class="main" id="companies" style="background:#fff;padding:32px 24px;margin-top:24px;">
+    <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h2 style="font-size:22px;font-weight:700;color:var(--text-primary);">🏢 入驻企业</h2>
+        <span style="font-size:13px;color:var(--text-tertiary);">优质企业 · 期待加入</span>
+    </div>
+    <div id="companyList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;"></div>
+</section>
+
 <footer class="footer">
     <div>
         <a href="/portal">首页</a>·
-        <a href="/portal">职位</a>·
-        <a href="/portal">公司</a>·
+        <a href="/portal?scroll=positions">职位</a>·
+        <a href="/portal?scroll=companies">公司</a>·
         <a href="/login">企业服务</a>·
         <a href="/register">关于我们</a>
     </div>
@@ -741,22 +750,35 @@ function initAuthUI() {
     const userStr = localStorage.getItem(USER_KEY);
     const guestArea = document.getElementById('guestArea');
     const userArea = document.getElementById('userArea');
-    const profileLink = document.getElementById('profileLink');
     const profileNav = document.getElementById('profileNav');
+    const profileLink = document.getElementById('profileLink');
+    const hrEntryLink = document.getElementById('hrEntryLink');
     if (token && userStr) {
         try {
             const user = JSON.parse(userStr);
             guestArea.style.display = 'none';
             userArea.style.display = 'flex';
-            profileLink.style.display = '';
-            profileNav.style.display = '';
+            if (profileNav) profileNav.style.display = '';
+            if (profileLink) profileLink.style.display = '';
+            // HR和管理员显示工作台入口
+            if (hrEntryLink && (user.role === 'HR' || user.role === 'ADMIN')) {
+                hrEntryLink.style.display = '';
+            } else if (hrEntryLink) {
+                hrEntryLink.style.display = 'none';
+            }
             document.getElementById('userName').innerText = user.realName || user.username;
             document.getElementById('userAvatar').innerText = (user.realName || user.username).charAt(0).toUpperCase();
         } catch (e) {
-            guestArea.style.display = ''; userArea.style.display = 'none'; profileLink.style.display = 'none'; profileNav.style.display = 'none';
+            guestArea.style.display = ''; userArea.style.display = 'none';
+            if (profileNav) profileNav.style.display = 'none';
+            if (profileLink) profileLink.style.display = 'none';
+            if (hrEntryLink) hrEntryLink.style.display = 'none';
         }
     } else {
-        guestArea.style.display = ''; userArea.style.display = 'none'; profileLink.style.display = 'none'; profileNav.style.display = 'none';
+        guestArea.style.display = ''; userArea.style.display = 'none';
+        if (profileNav) profileNav.style.display = 'none';
+        if (profileLink) profileLink.style.display = 'none';
+        if (hrEntryLink) hrEntryLink.style.display = 'none';
     }
     if (token) {
         fetch('/api/auth/me', { credentials: 'include' }).then(r => r.json()).then(json => {
@@ -766,6 +788,12 @@ function initAuthUI() {
                 localStorage.setItem(USER_KEY, JSON.stringify(json.data));
                 document.getElementById('userName').innerText = json.data.realName || json.data.username;
                 document.getElementById('userAvatar').innerText = (json.data.realName || json.data.username).charAt(0).toUpperCase();
+                // 更新HR入口显示
+                if (hrEntryLink && (json.data.role === 'HR' || json.data.role === 'ADMIN')) {
+                    hrEntryLink.style.display = '';
+                } else if (hrEntryLink) {
+                    hrEntryLink.style.display = 'none';
+                }
             }
         }).catch(()=>{});
     }
@@ -1141,11 +1169,55 @@ document.getElementById('heroKeywordInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') heroSearch();
 });
 
+// ============ Company List ============
+function loadCompanies() {
+    fetch('/api/companies?current=1&size=12').then(r => r.json()).then(json => {
+        if (json.code !== 0 || !json.data || !json.data.records) return;
+        const list = document.getElementById('companyList');
+        if (!list) return;
+        list.innerHTML = json.data.records.map(function(c) {
+            var logoText = (c.name || '?').substring(0, 2);
+            var jobCount = c.jobCount || 0;
+            return '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;transition:all .2s;cursor:pointer;" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,0.08)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'\';this.style.transform=\'\'" onclick="searchByCompany(\'' + escapeHtml(c.name) + '\')">'
+                + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+                + '<div style="width:48px;height:48px;border-radius:10px;background:var(--primary-gradient);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;">' + escapeHtml(logoText) + '</div>'
+                + '<div><div style="font-size:15px;font-weight:600;color:var(--text-primary);">' + escapeHtml(c.name) + '</div>'
+                + '<div style="font-size:12px;color:var(--text-tertiary);">' + escapeHtml(c.industry || '互联网') + '</div></div></div>'
+                + '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">' + escapeHtml((c.description || '').substring(0, 60)) + (c.description && c.description.length > 60 ? '...' : '') + '</div>'
+                + '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">'
+                + (c.size ? '<span class="meta-item">' + escapeHtml(c.size) + '</span>' : '')
+                + (c.location ? '<span class="meta-item">' + escapeHtml(c.location) + '</span>' : '')
+                + '</div></div>';
+        }).join('');
+    }).catch(function(){});
+}
+
+function searchByCompany(name) {
+    state.keyword = name;
+    document.getElementById('keywordInput').value = name;
+    loadData(1);
+    document.getElementById('positions').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ============ Nav Scroll ============
+function handleNavScroll() {
+    var params = new URLSearchParams(location.search);
+    var scrollTarget = params.get('scroll');
+    if (scrollTarget) {
+        setTimeout(function() {
+            var el = document.getElementById(scrollTarget);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 500);
+    }
+}
+
 // ============ Init ============
 initRegionSelects();
 initAuthUI();
 loadStats();
 loadData(1);
+loadCompanies();
+handleNavScroll();
 </script>
 </body>
 </html>
